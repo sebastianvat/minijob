@@ -6,6 +6,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Header } from '@/components/header';
 
 // Generate static paths for all Skill Zones
 export function generateStaticParams() {
@@ -105,32 +106,21 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/categories">
-                <ArrowLeft className="w-5 h-5" />
-              </Link>
-            </Button>
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-slate-900">MiniJob</span>
+      {/* Header with mobile menu */}
+      <Header />
+      
+      {/* Back button */}
+      <div className="bg-white border-b border-slate-100 px-4 py-2">
+        <div className="container mx-auto">
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/categories" className="flex items-center gap-2 text-slate-600">
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Înapoi la categorii</span>
+              <span className="sm:hidden">Înapoi</span>
             </Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" asChild>
-              <Link href="/auth/login">Intră în cont</Link>
-            </Button>
-            <Button className="bg-orange-500 hover:bg-orange-600" asChild>
-              <Link href="/auth/register">Devino prestator</Link>
-            </Button>
-          </div>
+          </Button>
         </div>
-      </header>
+      </div>
 
       {/* Category Hero */}
       <section className="bg-white border-b border-slate-100 py-8 px-4">

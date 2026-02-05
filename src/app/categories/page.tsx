@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Header } from '@/components/header';
 
 const skillZones = [
   { 
@@ -86,25 +87,8 @@ export default function CategoriesPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-slate-900">MiniJob</span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" asChild>
-              <Link href="/auth/login">Intră în cont</Link>
-            </Button>
-            <Button className="bg-orange-500 hover:bg-orange-600" asChild>
-              <Link href="/auth/register">Devino specialist</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      {/* Header with mobile menu */}
+      <Header />
 
       {/* Hero */}
       <section className="bg-gradient-to-b from-slate-50 to-white py-10 md:py-16 px-4">
