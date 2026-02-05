@@ -57,7 +57,7 @@ export default function MyProjectsPage() {
       setUser(user);
 
       // Load user's projects with offers
-      const { data: projectsData, error } = await supabase
+      const { data: projectsData, error } = await (supabase as any)
         .from('projects')
         .select(`
           *,

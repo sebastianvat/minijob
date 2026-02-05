@@ -57,7 +57,7 @@ export default function ProjectsPage() {
       }
 
       // Load open projects
-      let query = supabase
+      let query = (supabase as any)
         .from('projects')
         .select(`
           *,

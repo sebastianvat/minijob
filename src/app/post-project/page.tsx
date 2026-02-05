@@ -141,7 +141,7 @@ export default function PostProjectPage() {
       .from('categories')
       .select('id')
       .eq('slug', selectedCategory)
-      .single();
+      .single() as { data: { id: string } | null };
 
     if (!categoryData) {
       toast.error('Categoria selectată nu a fost găsită.');
@@ -150,21 +150,21 @@ export default function PostProjectPage() {
     }
 
     // Get skill ID if selected
-    let skillId = null;
+    let skillId: string | null = null;
     if (selectedSkill) {
       const { data: skillData } = await supabase
         .from('skills')
         .select('id')
         .eq('slug', selectedSkill)
-        .single();
+        .single() as { data: { id: string } | null };
       
       if (skillData) {
         skillId = skillData.id;
       }
     }
 
-    // Create project
-    const { error } = await supabase
+    // Create project (using any to bypass type checking for new table)
+    const { error } = await (supabase as any)
       .from('projects')
       .insert({
         client_id: user.id,
