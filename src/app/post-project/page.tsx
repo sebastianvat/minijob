@@ -134,13 +134,63 @@ export default function PostProjectPage() {
 
     setSubmitting(true);
 
-    // Simulate API call - in production, save to Supabase
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const supabase = createClient();
 
-    // For now, just show success
+    // Get category ID from database
+    const { data: categoryData } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('slug', selectedCategory)
+      .single();
+
+    if (!categoryData) {
+      toast.error('Categoria selectată nu a fost găsită.');
+      setSubmitting(false);
+      return;
+    }
+
+    // Get skill ID if selected
+    let skillId = null;
+    if (selectedSkill) {
+      const { data: skillData } = await supabase
+        .from('skills')
+        .select('id')
+        .eq('slug', selectedSkill)
+        .single();
+      
+      if (skillData) {
+        skillId = skillData.id;
+      }
+    }
+
+    // Create project
+    const { error } = await supabase
+      .from('projects')
+      .insert({
+        client_id: user.id,
+        category_id: categoryData.id,
+        skill_id: skillId,
+        title: title,
+        description: description,
+        photos: photos,
+        budget_min: budgetMin ? parseInt(budgetMin) : null,
+        budget_max: budgetMax ? parseInt(budgetMax) : null,
+        location_city: city,
+        location_address: address || null,
+        deadline: deadline || null,
+        urgency: urgency,
+        status: 'open',
+      });
+
+    if (error) {
+      toast.error(`Eroare la publicare: ${error.message}`);
+      console.error('Project creation error:', error);
+      setSubmitting(false);
+      return;
+    }
+
     setSuccess(true);
     setSubmitting(false);
-    
     toast.success('Proiect publicat cu succes! Vei primi oferte în curând.');
   };
 
