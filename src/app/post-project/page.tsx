@@ -275,9 +275,9 @@ export default function PostProjectPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Page Title */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Postează un Proiect</h1>
-            <p className="text-slate-600">Descrie ce ai nevoie și primește oferte de la specialiști</p>
+          <div className="text-center mb-6 md:mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Postează un Proiect</h1>
+            <p className="text-sm md:text-base text-slate-600">Descrie ce ai nevoie și primește oferte de la specialiști</p>
           </div>
 
           {/* Progress Steps */}

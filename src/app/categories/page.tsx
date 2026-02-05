@@ -107,15 +107,15 @@ export default function CategoriesPage() {
       </header>
 
       {/* Hero */}
-      <section className="bg-gradient-to-b from-slate-50 to-white py-16 px-4">
+      <section className="bg-gradient-to-b from-slate-50 to-white py-10 md:py-16 px-4">
         <div className="container mx-auto text-center">
           <Badge className="bg-teal-50 text-teal-700 border-teal-200 mb-4">
             Skill Zones
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+          <h1 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4">
             Ce skill cauți?
           </h1>
-          <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-slate-600 mb-6 md:mb-8 max-w-2xl mx-auto">
             Găsește specialiști verificați sau postează un proiect și primește oferte
           </p>
           
@@ -123,20 +123,20 @@ export default function CategoriesPage() {
           <div className="max-w-xl mx-auto relative mb-6">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <Input 
-              placeholder="Caută skill (ex: zugrăvit, curățenie, detailing)"
-              className="pl-12 h-14 text-lg border-slate-200 shadow-lg shadow-slate-200/50"
+              placeholder="Caută skill (ex: zugrăvit, curățenie)"
+              className="pl-12 h-12 md:h-14 text-base md:text-lg border-slate-200 shadow-lg shadow-slate-200/50"
             />
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex justify-center gap-4">
-            <Button size="lg" className="bg-orange-500 hover:bg-orange-600" asChild>
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+            <Button size="lg" className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto" asChild>
               <Link href="/post-project">
                 <FileText className="w-5 h-5 mr-2" />
                 Postează un proiect
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
+            <Button size="lg" variant="outline" className="w-full sm:w-auto" asChild>
               <Link href="/projects">Vezi proiecte active</Link>
             </Button>
           </div>
@@ -144,19 +144,19 @@ export default function CategoriesPage() {
       </section>
 
       {/* Popular Skill Zones */}
-      <section className="py-12 px-4">
+      <section className="py-8 md:py-12 px-4">
         <div className="container mx-auto">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6 md:mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">Cele mai căutate</h2>
-              <p className="text-slate-500">Skill Zones populare</p>
+              <h2 className="text-xl md:text-2xl font-bold text-slate-900">Cele mai căutate</h2>
+              <p className="text-sm md:text-base text-slate-500">Skill Zones populare</p>
             </div>
-            <Badge className="bg-orange-100 text-orange-600 border-orange-200">
+            <Badge className="bg-orange-100 text-orange-600 border-orange-200 text-xs md:text-sm">
               🔥 Trending
             </Badge>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {popularZones.map((zone) => (
               <Link key={zone.slug} href={`/categories/${zone.slug}`}>
                 <Card className="group h-full border-slate-200 hover:border-teal-300 hover:shadow-xl hover:shadow-teal-500/10 transition-all cursor-pointer overflow-hidden">
@@ -190,11 +190,11 @@ export default function CategoriesPage() {
       </section>
 
       {/* All Skill Zones */}
-      <section className="py-12 px-4 bg-slate-50">
+      <section className="py-8 md:py-12 px-4 bg-slate-50">
         <div className="container mx-auto">
-          <h2 className="text-2xl font-bold text-slate-900 mb-8">Toate Skill Zones</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900 mb-6 md:mb-8">Toate Skill Zones</h2>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {skillZones.map((zone) => (
               <Link key={zone.slug} href={`/categories/${zone.slug}`}>
                 <Card className="group border-slate-200 hover:border-teal-300 hover:shadow-lg transition-all cursor-pointer">
@@ -216,15 +216,15 @@ export default function CategoriesPage() {
       </section>
 
       {/* CTA - Post Project */}
-      <section className="py-16 px-4 bg-gradient-to-r from-orange-500 to-orange-600">
+      <section className="py-10 md:py-16 px-4 bg-gradient-to-r from-orange-500 to-orange-600">
         <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 md:mb-4">
             Nu găsești exact ce cauți?
           </h2>
-          <p className="text-orange-100 mb-8 text-lg max-w-xl mx-auto">
+          <p className="text-orange-100 mb-6 md:mb-8 text-base md:text-lg max-w-xl mx-auto">
             Postează un proiect cu detaliile tale și primește oferte de la specialiști verificați
           </p>
-          <Button size="lg" className="bg-white text-orange-600 hover:bg-orange-50" asChild>
+          <Button size="lg" className="bg-white text-orange-600 hover:bg-orange-50 w-full sm:w-auto" asChild>
             <Link href="/post-project">
               <FileText className="w-5 h-5 mr-2" />
               Postează un proiect gratuit
