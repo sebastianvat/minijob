@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { 
   Clock, Shield, Star, ArrowRight, CheckCircle2, Users, Zap, Heart, MapPin,
-  Phone, Calendar, CreditCard, Home, Hammer, Car, Laptop, PawPrint, Baby, FileText
+  Phone, Calendar, CreditCard, Home as HomeIcon, Hammer, Car, Laptop, PawPrint, Baby, FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { Header } from "@/components/header";
 const skillZones = [
   { 
     name: "Casă", 
-    icon: Home, 
+    icon: HomeIcon, 
     color: "bg-slate-700", 
     skills: "Curățenie, gătit, organizare",
     providers: 234,
