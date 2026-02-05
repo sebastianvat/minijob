@@ -2,17 +2,18 @@ import Link from "next/link";
 import { 
   Sparkles, Hammer, Wrench, Leaf, Clock, Shield, Star, 
   ArrowRight, CheckCircle2, Users, Zap, Heart, MapPin,
-  Phone, Calendar, CreditCard, MessageCircle
+  Phone, Calendar, CreditCard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Header } from "@/components/header";
 
 const categories = [
-  { name: "Curățenie", icon: Sparkles, color: "bg-orange-500", price: "de la 50 lei/h", desc: "Curățenie generală sau detaliată" },
-  { name: "Montaj Mobilă", icon: Hammer, color: "bg-orange-500", price: "de la 100 lei", desc: "IKEA, Jysk, Dedeman" },
-  { name: "Reparații", icon: Wrench, color: "bg-orange-500", price: "de la 80 lei/h", desc: "Reparații mici în casă" },
-  { name: "Grădinărit", icon: Leaf, color: "bg-orange-500", price: "de la 50 lei/h", desc: "Întreținere grădină" },
+  { name: "Curățenie", icon: Sparkles, color: "bg-orange-500", price: "de la 50 lei/h", desc: "Curățenie generală sau detaliată", slug: "curatenie" },
+  { name: "Montaj Mobilă", icon: Hammer, color: "bg-orange-500", price: "de la 100 lei", desc: "IKEA, Jysk, Dedeman", slug: "montaj-mobila" },
+  { name: "Reparații", icon: Wrench, color: "bg-orange-500", price: "de la 80 lei/h", desc: "Reparații mici în casă", slug: "reparatii" },
+  { name: "Grădinărit", icon: Leaf, color: "bg-orange-500", price: "de la 50 lei/h", desc: "Întreținere grădină", slug: "gradinarit" },
 ];
 
 const steps = [
@@ -68,38 +69,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-lg border-b border-slate-100">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-slate-900">MiniJob</span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="#servicii" className="text-slate-600 hover:text-orange-500 transition-colors font-medium">
-              Servicii
-            </Link>
-            <Link href="#cum-functioneaza" className="text-slate-600 hover:text-orange-500 transition-colors font-medium">
-              Cum funcționează
-            </Link>
-            <Link href="#testimoniale" className="text-slate-600 hover:text-orange-500 transition-colors font-medium">
-              Testimoniale
-            </Link>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" className="text-slate-600 hover:text-orange-500">
-              Intră în cont
-            </Button>
-            <Button className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white shadow-lg shadow-orange-500/25">
-              Devino prestator
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero */}
-      <section className="pt-32 pb-20 px-4 bg-gradient-to-b from-orange-50/50 to-white">
+      <section className="pt-8 pb-20 px-4 bg-gradient-to-b from-orange-50/50 to-white">
         <div className="container mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -119,9 +92,11 @@ export default function Home() {
               </p>
               
               <div className="flex flex-col sm:flex-row items-start gap-4 mb-8">
-                <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white text-lg h-14 px-8 shadow-xl shadow-orange-500/25">
-                  Găsește prestator
-                  <ArrowRight className="ml-2 w-5 h-5" />
+                <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white text-lg h-14 px-8 shadow-xl shadow-orange-500/25" asChild>
+                  <Link href="/categories">
+                    Găsește prestator
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Link>
                 </Button>
                 <Button size="lg" variant="outline" className="w-full sm:w-auto border-slate-200 text-slate-700 hover:bg-slate-50 text-lg h-14 px-8">
                   <Phone className="mr-2 w-5 h-5" />
@@ -215,26 +190,27 @@ export default function Home() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {categories.map((cat) => (
-              <Card 
-                key={cat.name} 
-                className="group bg-white border-slate-200 hover:border-orange-300 hover:shadow-xl hover:shadow-orange-500/10 transition-all cursor-pointer"
-              >
-                <CardContent className="p-6">
-                  <div className={`w-14 h-14 ${cat.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-orange-500/25`}>
-                    <cat.icon className="w-7 h-7 text-white" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-1">{cat.name}</h3>
-                  <p className="text-sm text-slate-500 mb-3">{cat.desc}</p>
-                  <p className="text-orange-500 font-semibold">{cat.price}</p>
-                </CardContent>
-              </Card>
+              <Link key={cat.name} href={`/categories/${cat.slug}`}>
+                <Card className="group bg-white border-slate-200 hover:border-orange-300 hover:shadow-xl hover:shadow-orange-500/10 transition-all cursor-pointer h-full">
+                  <CardContent className="p-6">
+                    <div className={`w-14 h-14 ${cat.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-orange-500/25`}>
+                      <cat.icon className="w-7 h-7 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-1">{cat.name}</h3>
+                    <p className="text-sm text-slate-500 mb-3">{cat.desc}</p>
+                    <p className="text-orange-500 font-semibold">{cat.price}</p>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
           
           <div className="text-center mt-10">
-            <Button variant="outline" className="border-orange-200 text-orange-600 hover:bg-orange-50">
-              Vezi toate categoriile
-              <ArrowRight className="ml-2 w-4 h-4" />
+            <Button variant="outline" className="border-orange-200 text-orange-600 hover:bg-orange-50" asChild>
+              <Link href="/categories">
+                Vezi toate categoriile
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
             </Button>
           </div>
         </div>
@@ -359,9 +335,11 @@ export default function Home() {
                       <span>Plată sigură și la timp</span>
                     </div>
                   </div>
-                  <Button size="lg" className="bg-white text-orange-500 hover:bg-orange-50 text-lg h-14 px-8 shadow-lg">
-                    Înscrie-te gratuit
-                    <ArrowRight className="ml-2 w-5 h-5" />
+                  <Button size="lg" className="bg-white text-orange-500 hover:bg-orange-50 text-lg h-14 px-8 shadow-lg" asChild>
+                    <Link href="/auth/register">
+                      Înscrie-te gratuit
+                      <ArrowRight className="ml-2 w-5 h-5" />
+                    </Link>
                   </Button>
                 </div>
                 <div className="hidden md:block">
@@ -421,17 +399,17 @@ export default function Home() {
             <div>
               <h4 className="font-semibold text-white mb-4">Servicii</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li><Link href="#" className="hover:text-orange-400">Curățenie</Link></li>
-                <li><Link href="#" className="hover:text-orange-400">Montaj mobilă</Link></li>
-                <li><Link href="#" className="hover:text-orange-400">Reparații</Link></li>
-                <li><Link href="#" className="hover:text-orange-400">Grădinărit</Link></li>
+                <li><Link href="/categories/curatenie" className="hover:text-orange-400">Curățenie</Link></li>
+                <li><Link href="/categories/montaj-mobila" className="hover:text-orange-400">Montaj mobilă</Link></li>
+                <li><Link href="/categories/reparatii" className="hover:text-orange-400">Reparații</Link></li>
+                <li><Link href="/categories/gradinarit" className="hover:text-orange-400">Grădinărit</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-4">Companie</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
                 <li><Link href="#" className="hover:text-orange-400">Despre noi</Link></li>
-                <li><Link href="#" className="hover:text-orange-400">Devino prestator</Link></li>
+                <li><Link href="/auth/register" className="hover:text-orange-400">Devino prestator</Link></li>
                 <li><Link href="#" className="hover:text-orange-400">Blog</Link></li>
                 <li><Link href="#" className="hover:text-orange-400">Contact</Link></li>
               </ul>
