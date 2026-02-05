@@ -1,23 +1,21 @@
 import Link from 'next/link';
 import { 
-  Zap, Sparkles, Hammer, Wrench, PaintBucket, 
-  Zap as ZapIcon, Leaf, Truck, ArrowLeft, Star,
-  MapPin, Clock, CheckCircle2
+  Zap, Sparkles, Hammer, Car, Laptop, PawPrint, Baby,
+  ArrowLeft, Star, MapPin, Clock, CheckCircle2, Home
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-// Generate static paths for all categories
+// Generate static paths for all Skill Zones
 export function generateStaticParams() {
   return [
-    { slug: 'curatenie' },
-    { slug: 'montaj-mobila' },
-    { slug: 'reparatii' },
-    { slug: 'zugravit' },
-    { slug: 'instalatii' },
-    { slug: 'gradinarit' },
-    { slug: 'mutari' },
+    { slug: 'casa' },
+    { slug: 'constructii' },
+    { slug: 'auto' },
+    { slug: 'tech' },
+    { slug: 'pets' },
+    { slug: 'kids' },
   ];
 }
 
@@ -27,13 +25,12 @@ const categoryData: Record<string, {
   color: string;
   description: string;
 }> = {
-  'curatenie': { name: 'Curățenie', icon: Sparkles, color: 'bg-pink-500', description: 'Curățenie generală, detaliată sau după renovare' },
-  'montaj-mobila': { name: 'Montaj Mobilă', icon: Hammer, color: 'bg-amber-500', description: 'Montaj mobilier IKEA, Jysk, Dedeman' },
-  'reparatii': { name: 'Reparații', icon: Wrench, color: 'bg-blue-500', description: 'Reparații mici în casă' },
-  'zugravit': { name: 'Zugrăvit', icon: PaintBucket, color: 'bg-purple-500', description: 'Zugrăvit și vopsit pereți' },
-  'instalatii': { name: 'Instalații', icon: ZapIcon, color: 'bg-yellow-500', description: 'Instalații sanitare și electrice' },
-  'gradinarit': { name: 'Grădinărit', icon: Leaf, color: 'bg-green-500', description: 'Întreținere grădină și curte' },
-  'mutari': { name: 'Mutări', icon: Truck, color: 'bg-slate-600', description: 'Transport și mutare mobilier' },
+  'casa': { name: 'Casă', icon: Home, color: 'bg-teal-500', description: 'Curățenie, gătit, organizare, menaj' },
+  'constructii': { name: 'Construcții', icon: Hammer, color: 'bg-amber-500', description: 'Zugrăvit, parchet, renovări, reparații' },
+  'auto': { name: 'Auto', icon: Car, color: 'bg-blue-500', description: 'Detailing, polish, mecanică ușoară' },
+  'tech': { name: 'Tech Jobs', icon: Laptop, color: 'bg-purple-500', description: 'Social media, data entry, tech support' },
+  'pets': { name: 'Pet Care', icon: PawPrint, color: 'bg-green-500', description: 'Plimbat câini, pet sitting, îngrijire' },
+  'kids': { name: 'Kids & Learning', icon: Baby, color: 'bg-pink-500', description: 'Bonă, meditații, skill-uri noi' },
 };
 
 // Mock providers for demo
