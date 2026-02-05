@@ -1,0 +1,12 @@
+# MiniJob.ro Robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://minijob.ro/sitemap.xml
+
+# Disallow admin/auth pages from indexing
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /auth/
+Disallow: /book/
