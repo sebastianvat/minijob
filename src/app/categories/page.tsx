@@ -17,8 +17,6 @@ const skillZones = [
     bgLight: 'bg-teal-50',
     description: 'Curățenie, gătit, organizare, menaj',
     skills: ['Curățenie generală', 'Curățenie după renovare', 'Gătit', 'Călcat'],
-    priceRange: '40-120 lei/h',
-    providers: 156,
     popular: true
   },
   { 
@@ -29,8 +27,6 @@ const skillZones = [
     bgLight: 'bg-amber-50',
     description: 'Zugrăvit, parchet, renovări, reparații',
     skills: ['Zugrăvit', 'Montaj parchet', 'Montaj mobilă', 'Instalații sanitare'],
-    priceRange: '60-150 lei/h',
-    providers: 89,
     popular: true
   },
   { 
@@ -41,8 +37,6 @@ const skillZones = [
     bgLight: 'bg-blue-50',
     description: 'Detailing, polish, mecanică ușoară',
     skills: ['Detailing interior', 'Polish exterior', 'Spălătorie la domiciliu'],
-    priceRange: '150-600 lei',
-    providers: 34,
     popular: true
   },
   { 
@@ -53,8 +47,6 @@ const skillZones = [
     bgLight: 'bg-purple-50',
     description: 'Social media, data entry, tech support',
     skills: ['Social media management', 'Răspuns mesaje', 'Tech support', 'Data entry'],
-    priceRange: '50-150 lei/h',
-    providers: 67,
     popular: false
   },
   { 
@@ -65,8 +57,6 @@ const skillZones = [
     bgLight: 'bg-green-50',
     description: 'Plimbat câini, pet sitting, îngrijire',
     skills: ['Plimbat câini', 'Pet sitting', 'Îngrijire animale'],
-    priceRange: '30-200 lei',
-    providers: 45,
     popular: false
   },
   { 
@@ -77,8 +67,16 @@ const skillZones = [
     bgLight: 'bg-pink-50',
     description: 'Bonă, meditații, skill-uri noi',
     skills: ['Bonă', 'Meditații matematică', 'Lecții de muzică', 'Învățare limbă străină'],
-    priceRange: '40-150 lei/h',
-    providers: 78,
+    popular: false
+  },
+  { 
+    slug: 'altceva', 
+    name: 'Altceva', 
+    icon: Zap, 
+    color: 'bg-slate-500',
+    bgLight: 'bg-slate-50',
+    description: 'Ai nevoie de altceva? Spune-ne!',
+    skills: ['Orice alt skill', 'Proiecte speciale', 'Idei noi'],
     popular: false
   },
 ];
@@ -178,10 +176,7 @@ export default function CategoriesPage() {
                       </div>
                     </div>
                     <div className="p-4 bg-white flex items-center justify-between">
-                      <div>
-                        <p className="text-orange-500 font-semibold">{zone.priceRange}</p>
-                        <p className="text-sm text-slate-500">{zone.providers} specialiști</p>
-                      </div>
+                      <p className="text-sm text-slate-500">Vezi specialiști disponibili</p>
                       <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
                         <ArrowRight className="w-5 h-5 text-teal-500 group-hover:text-white transition-colors" />
                       </div>
@@ -209,8 +204,7 @@ export default function CategoriesPage() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-slate-900 text-lg">{zone.name}</h3>
-                      <p className="text-sm text-slate-500">{zone.providers} specialiști</p>
-                      <p className="text-xs text-slate-400 mt-1">{zone.description}</p>
+                      <p className="text-sm text-slate-500">{zone.description}</p>
                     </div>
                     <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-orange-500 transition-colors" />
                   </CardContent>

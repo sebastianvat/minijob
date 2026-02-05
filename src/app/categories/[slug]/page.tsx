@@ -16,6 +16,7 @@ export function generateStaticParams() {
     { slug: 'tech' },
     { slug: 'pets' },
     { slug: 'kids' },
+    { slug: 'altceva' },
   ];
 }
 
@@ -31,6 +32,7 @@ const categoryData: Record<string, {
   'tech': { name: 'Tech Jobs', icon: Laptop, color: 'bg-purple-500', description: 'Social media, data entry, tech support' },
   'pets': { name: 'Pet Care', icon: PawPrint, color: 'bg-green-500', description: 'Plimbat câini, pet sitting, îngrijire' },
   'kids': { name: 'Kids & Learning', icon: Baby, color: 'bg-pink-500', description: 'Bonă, meditații, skill-uri noi' },
+  'altceva': { name: 'Altceva', icon: Sparkles, color: 'bg-slate-500', description: 'Proiecte speciale și idei noi' },
 };
 
 // Mock providers for demo

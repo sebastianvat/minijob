@@ -26,46 +26,51 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   tech: <Laptop className="w-6 h-6" />,
   pets: <PawPrint className="w-6 h-6" />,
   kids: <Baby className="w-6 h-6" />,
+  altceva: <Zap className="w-6 h-6" />,
 };
 
 // Mock categories until we run migration
 const MOCK_CATEGORIES: Category[] = [
-  { id: '1', slug: 'casa', name: 'Casă', description: 'Curățenie, gătit, organizare, menaj', icon: 'Home', price_type: 'hourly', price_min: 40, price_max: 100, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 1, created_at: '' },
-  { id: '2', slug: 'constructii', name: 'Construcții', description: 'Zugrăvit, parchet, renovări, reparații', icon: 'Hammer', price_type: 'custom', price_min: 100, price_max: 10000, duration_min: null, duration_max: null, instant_booking: false, active: true, sort_order: 2, created_at: '' },
-  { id: '3', slug: 'auto', name: 'Auto', description: 'Detailing, polish, mecanică ușoară', icon: 'Car', price_type: 'fixed', price_min: 100, price_max: 1000, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 3, created_at: '' },
-  { id: '4', slug: 'tech', name: 'Tech Jobs', description: 'Social media, data entry, tech support', icon: 'Laptop', price_type: 'hourly', price_min: 50, price_max: 200, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 4, created_at: '' },
-  { id: '5', slug: 'pets', name: 'Pet Care', description: 'Plimbat câini, pet sitting', icon: 'PawPrint', price_type: 'hourly', price_min: 30, price_max: 80, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 5, created_at: '' },
-  { id: '6', slug: 'kids', name: 'Kids & Learning', description: 'Bonă, meditații, skill-uri noi', icon: 'Baby', price_type: 'hourly', price_min: 50, price_max: 150, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 6, created_at: '' },
+  { id: '1', slug: 'casa', name: 'Casă', description: 'Curățenie, gătit, organizare, menaj', icon: 'Home', price_type: 'hourly', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 1, created_at: '' },
+  { id: '2', slug: 'constructii', name: 'Construcții', description: 'Zugrăvit, parchet, renovări, reparații', icon: 'Hammer', price_type: 'custom', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: false, active: true, sort_order: 2, created_at: '' },
+  { id: '3', slug: 'auto', name: 'Auto', description: 'Detailing, polish, mecanică ușoară', icon: 'Car', price_type: 'fixed', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 3, created_at: '' },
+  { id: '4', slug: 'tech', name: 'Tech Jobs', description: 'Social media, data entry, tech support', icon: 'Laptop', price_type: 'hourly', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 4, created_at: '' },
+  { id: '5', slug: 'pets', name: 'Pet Care', description: 'Plimbat câini, pet sitting', icon: 'PawPrint', price_type: 'hourly', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 5, created_at: '' },
+  { id: '6', slug: 'kids', name: 'Kids & Learning', description: 'Bonă, meditații, skill-uri noi', icon: 'Baby', price_type: 'hourly', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 6, created_at: '' },
+  { id: '7', slug: 'altceva', name: 'Altceva', description: 'Ai nevoie de altceva? Spune-ne!', icon: 'Zap', price_type: 'custom', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: false, active: true, sort_order: 7, created_at: '' },
 ];
 
-// Mock skills per category
+// Mock skills per category (no hardcoded prices - specialists will set their own)
 const MOCK_SKILLS: Record<string, Skill[]> = {
   'casa': [
-    { id: 's1', category_id: '1', slug: 'curatenie-generala', name: 'Curățenie Generală', description: 'Curățenie standard', icon: 'Sparkles', price_unit: 'ora', price_min: 40, price_max: 80, active: true, sort_order: 1, created_at: '' },
-    { id: 's2', category_id: '1', slug: 'curatenie-dupa-constructor', name: 'Curățenie după Constructor', description: 'Curățenie intensivă', icon: 'Sparkles', price_unit: 'ora', price_min: 80, price_max: 120, active: true, sort_order: 2, created_at: '' },
-    { id: 's3', category_id: '1', slug: 'gatit', name: 'Gătit', description: 'Preparare mese', icon: 'ChefHat', price_unit: 'ora', price_min: 60, price_max: 120, active: true, sort_order: 3, created_at: '' },
+    { id: 's1', category_id: '1', slug: 'curatenie-generala', name: 'Curățenie Generală', description: 'Curățenie standard', icon: 'Sparkles', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
+    { id: 's2', category_id: '1', slug: 'curatenie-dupa-constructor', name: 'Curățenie după Constructor', description: 'Curățenie intensivă', icon: 'Sparkles', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
+    { id: 's3', category_id: '1', slug: 'gatit', name: 'Gătit', description: 'Preparare mese', icon: 'ChefHat', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 3, created_at: '' },
   ],
   'constructii': [
-    { id: 's4', category_id: '2', slug: 'zugravit', name: 'Zugrăvit', description: 'Zugrăvit interior/exterior', icon: 'PaintBucket', price_unit: 'mp', price_min: 15, price_max: 40, active: true, sort_order: 1, created_at: '' },
-    { id: 's5', category_id: '2', slug: 'parchet', name: 'Montaj Parchet', description: 'Instalare parchet', icon: 'Layers', price_unit: 'mp', price_min: 25, price_max: 60, active: true, sort_order: 2, created_at: '' },
-    { id: 's6', category_id: '2', slug: 'montaj-mobila', name: 'Montaj Mobilă', description: 'Asamblare mobilier', icon: 'Package', price_unit: 'ora', price_min: 60, price_max: 120, active: true, sort_order: 3, created_at: '' },
-    { id: 's7', category_id: '2', slug: 'instalatii-sanitare', name: 'Instalații Sanitare', description: 'Montaj/reparații', icon: 'Droplet', price_unit: 'ora', price_min: 80, price_max: 150, active: true, sort_order: 4, created_at: '' },
+    { id: 's4', category_id: '2', slug: 'zugravit', name: 'Zugrăvit', description: 'Zugrăvit interior/exterior', icon: 'PaintBucket', price_unit: 'mp', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
+    { id: 's5', category_id: '2', slug: 'parchet', name: 'Montaj Parchet', description: 'Instalare parchet', icon: 'Layers', price_unit: 'mp', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
+    { id: 's6', category_id: '2', slug: 'montaj-mobila', name: 'Montaj Mobilă', description: 'Asamblare mobilier', icon: 'Package', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 3, created_at: '' },
+    { id: 's7', category_id: '2', slug: 'instalatii-sanitare', name: 'Instalații Sanitare', description: 'Montaj/reparații', icon: 'Droplet', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 4, created_at: '' },
   ],
   'auto': [
-    { id: 's8', category_id: '3', slug: 'detailing', name: 'Detailing Auto', description: 'Curățare profesională', icon: 'CarFront', price_unit: 'bucata', price_min: 150, price_max: 500, active: true, sort_order: 1, created_at: '' },
-    { id: 's9', category_id: '3', slug: 'polish', name: 'Polish Auto', description: 'Polish și ceruire', icon: 'Sparkle', price_unit: 'bucata', price_min: 200, price_max: 600, active: true, sort_order: 2, created_at: '' },
+    { id: 's8', category_id: '3', slug: 'detailing', name: 'Detailing Auto', description: 'Curățare profesională', icon: 'CarFront', price_unit: 'bucata', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
+    { id: 's9', category_id: '3', slug: 'polish', name: 'Polish Auto', description: 'Polish și ceruire', icon: 'Sparkle', price_unit: 'bucata', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
   ],
   'tech': [
-    { id: 's10', category_id: '4', slug: 'social-media', name: 'Social Media', description: 'Gestionare conturi', icon: 'MessageCircle', price_unit: 'ora', price_min: 50, price_max: 150, active: true, sort_order: 1, created_at: '' },
-    { id: 's11', category_id: '4', slug: 'tech-support', name: 'Tech Support', description: 'Ajutor tehnic', icon: 'Monitor', price_unit: 'ora', price_min: 60, price_max: 120, active: true, sort_order: 2, created_at: '' },
+    { id: 's10', category_id: '4', slug: 'social-media', name: 'Social Media', description: 'Gestionare conturi', icon: 'MessageCircle', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
+    { id: 's11', category_id: '4', slug: 'tech-support', name: 'Tech Support', description: 'Ajutor tehnic', icon: 'Monitor', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
   ],
   'pets': [
-    { id: 's12', category_id: '5', slug: 'plimbat-caini', name: 'Plimbat Câini', description: 'Plimbări zilnice', icon: 'Dog', price_unit: 'ora', price_min: 30, price_max: 60, active: true, sort_order: 1, created_at: '' },
-    { id: 's13', category_id: '5', slug: 'pet-sitting', name: 'Pet Sitting', description: 'Îngrijire la domiciliu', icon: 'Home', price_unit: 'zi', price_min: 80, price_max: 200, active: true, sort_order: 2, created_at: '' },
+    { id: 's12', category_id: '5', slug: 'plimbat-caini', name: 'Plimbat Câini', description: 'Plimbări zilnice', icon: 'Dog', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
+    { id: 's13', category_id: '5', slug: 'pet-sitting', name: 'Pet Sitting', description: 'Îngrijire la domiciliu', icon: 'Home', price_unit: 'zi', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
   ],
   'kids': [
-    { id: 's14', category_id: '6', slug: 'bona', name: 'Bonă', description: 'Supraveghere copii', icon: 'Baby', price_unit: 'ora', price_min: 40, price_max: 80, active: true, sort_order: 1, created_at: '' },
-    { id: 's15', category_id: '6', slug: 'meditatii-matematica', name: 'Meditații Matematică', description: 'Pregătire matematică', icon: 'Calculator', price_unit: 'ora', price_min: 60, price_max: 150, active: true, sort_order: 2, created_at: '' },
+    { id: 's14', category_id: '6', slug: 'bona', name: 'Bonă', description: 'Supraveghere copii', icon: 'Baby', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
+    { id: 's15', category_id: '6', slug: 'meditatii-matematica', name: 'Meditații Matematică', description: 'Pregătire matematică', icon: 'Calculator', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
+  ],
+  'altceva': [
+    { id: 's16', category_id: '7', slug: 'proiect-special', name: 'Proiect Special', description: 'Descrie ce ai nevoie', icon: 'Zap', price_unit: 'proiect', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
   ],
 };
 
