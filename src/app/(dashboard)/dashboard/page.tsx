@@ -2,25 +2,48 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { 
   Zap, Calendar, MessageCircle, Star, Settings, LogOut,
-  Plus, Clock, CheckCircle2, Users, TrendingUp
+  Plus, Clock, CheckCircle2, Users, TrendingUp, MapPin,
+  XCircle, AlertCircle, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/client';
 
+interface Booking {
+  id: string;
+  status: string;
+  scheduled_date: string;
+  scheduled_time: string;
+  address: string;
+  price: number;
+  notes: string | null;
+  created_at: string;
+  provider_id: string;
+  client_id: string;
+}
+
+const statusConfig: Record<string, { label: string; color: string; icon: typeof Clock }> = {
+  pending: { label: 'În așteptare', color: 'bg-yellow-100 text-yellow-700 border-yellow-200', icon: Clock },
+  confirmed: { label: 'Confirmată', color: 'bg-blue-100 text-blue-700 border-blue-200', icon: CheckCircle2 },
+  in_progress: { label: 'În desfășurare', color: 'bg-purple-100 text-purple-700 border-purple-200', icon: AlertCircle },
+  completed: { label: 'Finalizată', color: 'bg-green-100 text-green-700 border-green-200', icon: CheckCircle2 },
+  cancelled: { label: 'Anulată', color: 'bg-red-100 text-red-700 border-red-200', icon: XCircle },
+};
+
 export default function DashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<{ email?: string } | null>(null);
-  const [profile, setProfile] = useState<{ full_name?: string; role?: string } | null>(null);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [profile, setProfile] = useState<{ full_name?: string; role?: string; phone?: string } | null>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ pending: 0, completed: 0, total: 0 });
 
   useEffect(() => {
     const supabase = createClient();
     
-    const getUser = async () => {
+    const loadData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -28,7 +51,7 @@ export default function DashboardPage() {
         return;
       }
 
-      setUser(user);
+      setUser({ id: user.id, email: user.email });
 
       // Get profile
       const { data: profileData } = await supabase
@@ -37,12 +60,33 @@ export default function DashboardPage() {
         .eq('id', user.id)
         .single();
 
-      setProfile(profileData);
+      const profileWithRole = profileData as { full_name?: string; role?: string; phone?: string } | null;
+      setProfile(profileWithRole);
+
+      // Get bookings based on role
+      const isProvider = profileWithRole?.role === 'provider';
+      const { data: bookingsData } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq(isProvider ? 'provider_id' : 'client_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (bookingsData) {
+        const typedBookings = bookingsData as Booking[];
+        setBookings(typedBookings);
+        setStats({
+          pending: typedBookings.filter(b => b.status === 'pending' || b.status === 'confirmed').length,
+          completed: typedBookings.filter(b => b.status === 'completed').length,
+          total: typedBookings.length,
+        });
+      }
+
       setLoading(false);
     };
 
-    getUser();
-  }, [router]);
+    loadData();
+  }, []);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -59,6 +103,7 @@ export default function DashboardPage() {
   }
 
   const isProvider = profile?.role === 'provider';
+  const isAdmin = profile?.role === 'admin';
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -87,7 +132,9 @@ export default function DashboardPage() {
               </div>
               <div className="hidden sm:block">
                 <p className="text-sm font-medium text-slate-900">{profile?.full_name || 'Utilizator'}</p>
-                <p className="text-xs text-slate-500">{isProvider ? 'Prestator' : 'Client'}</p>
+                <p className="text-xs text-slate-500">
+                  {isAdmin ? '👑 Admin' : isProvider ? 'Prestator' : 'Client'}
+                </p>
               </div>
             </div>
           </div>
@@ -101,9 +148,11 @@ export default function DashboardPage() {
             Bună, {profile?.full_name?.split(' ')[0] || 'Utilizator'}! 👋
           </h1>
           <p className="text-slate-500">
-            {isProvider 
-              ? 'Gestionează rezervările și serviciile tale'
-              : 'Găsește servicii sau vezi rezervările tale'
+            {isAdmin 
+              ? 'Panou de administrare MiniJob'
+              : isProvider 
+                ? 'Gestionează rezervările și serviciile tale'
+                : 'Găsește servicii sau vezi rezervările tale'
             }
           </p>
         </div>
@@ -115,21 +164,21 @@ export default function DashboardPage() {
               <Card className="bg-gradient-to-br from-orange-400 to-orange-500 border-0 text-white">
                 <CardContent className="p-6">
                   <TrendingUp className="w-8 h-8 mb-3 opacity-80" />
-                  <p className="text-3xl font-bold">0 lei</p>
-                  <p className="text-orange-100">Venituri luna aceasta</p>
+                  <p className="text-3xl font-bold">{bookings.reduce((sum, b) => b.status === 'completed' ? sum + b.price : sum, 0)} lei</p>
+                  <p className="text-orange-100">Venituri totale</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6">
                   <Calendar className="w-8 h-8 mb-3 text-orange-500" />
-                  <p className="text-3xl font-bold text-slate-900">0</p>
-                  <p className="text-slate-500">Rezervări noi</p>
+                  <p className="text-3xl font-bold text-slate-900">{stats.pending}</p>
+                  <p className="text-slate-500">Rezervări active</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6">
                   <CheckCircle2 className="w-8 h-8 mb-3 text-green-500" />
-                  <p className="text-3xl font-bold text-slate-900">0</p>
+                  <p className="text-3xl font-bold text-slate-900">{stats.completed}</p>
                   <p className="text-slate-500">Finalizate</p>
                 </CardContent>
               </Card>
@@ -143,8 +192,8 @@ export default function DashboardPage() {
             </>
           ) : (
             <>
-              <Link href="/#servicii">
-                <Card className="bg-gradient-to-br from-orange-400 to-orange-500 border-0 text-white hover:shadow-xl transition-shadow cursor-pointer">
+              <Link href="/categories">
+                <Card className="bg-gradient-to-br from-orange-400 to-orange-500 border-0 text-white hover:shadow-xl transition-shadow cursor-pointer h-full">
                   <CardContent className="p-6">
                     <Plus className="w-8 h-8 mb-3" />
                     <p className="text-lg font-semibold">Caută servicii</p>
@@ -155,22 +204,22 @@ export default function DashboardPage() {
               <Card>
                 <CardContent className="p-6">
                   <Clock className="w-8 h-8 mb-3 text-orange-500" />
-                  <p className="text-3xl font-bold text-slate-900">0</p>
+                  <p className="text-3xl font-bold text-slate-900">{stats.pending}</p>
                   <p className="text-slate-500">Rezervări active</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6">
                   <CheckCircle2 className="w-8 h-8 mb-3 text-green-500" />
-                  <p className="text-3xl font-bold text-slate-900">0</p>
+                  <p className="text-3xl font-bold text-slate-900">{stats.completed}</p>
                   <p className="text-slate-500">Finalizate</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6">
                   <Users className="w-8 h-8 mb-3 text-blue-500" />
-                  <p className="text-3xl font-bold text-slate-900">0</p>
-                  <p className="text-slate-500">Prestatori salvați</p>
+                  <p className="text-3xl font-bold text-slate-900">{stats.total}</p>
+                  <p className="text-slate-500">Total rezervări</p>
                 </CardContent>
               </Card>
             </>
@@ -186,26 +235,71 @@ export default function DashboardPage() {
                 <CardTitle className="text-lg">
                   {isProvider ? 'Rezervări recente' : 'Rezervările mele'}
                 </CardTitle>
-                <Button variant="ghost" size="sm" className="text-orange-500">
-                  Vezi toate
-                </Button>
+                {bookings.length > 0 && (
+                  <Badge variant="outline">{bookings.length} total</Badge>
+                )}
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12 text-slate-500">
-                  <Calendar className="w-12 h-12 mx-auto mb-4 text-slate-300" />
-                  <p className="font-medium">Nu ai rezervări încă</p>
-                  <p className="text-sm">
-                    {isProvider 
-                      ? 'Rezervările vor apărea aici când primești comenzi'
-                      : 'Caută un serviciu pentru a face prima rezervare'
-                    }
-                  </p>
-                  {!isProvider && (
-                    <Button asChild className="mt-4 bg-orange-500 hover:bg-orange-600">
-                      <Link href="/#servicii">Caută servicii</Link>
-                    </Button>
-                  )}
-                </div>
+                {bookings.length === 0 ? (
+                  <div className="text-center py-12 text-slate-500">
+                    <Calendar className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+                    <p className="font-medium">Nu ai rezervări încă</p>
+                    <p className="text-sm">
+                      {isProvider 
+                        ? 'Rezervările vor apărea aici când primești comenzi'
+                        : 'Caută un serviciu pentru a face prima rezervare'
+                      }
+                    </p>
+                    {!isProvider && (
+                      <Button asChild className="mt-4 bg-orange-500 hover:bg-orange-600">
+                        <Link href="/categories">Caută servicii</Link>
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {bookings.map((booking) => {
+                      const status = statusConfig[booking.status] || statusConfig.pending;
+                      const StatusIcon = status.icon;
+                      return (
+                        <div 
+                          key={booking.id} 
+                          className="flex items-center gap-4 p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                        >
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${status.color}`}>
+                            <StatusIcon className="w-6 h-6" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge className={status.color}>{status.label}</Badge>
+                              <span className="text-sm text-slate-500">
+                                #{booking.id.slice(0, 8)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-slate-600">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                {new Date(booking.scheduled_date).toLocaleDateString('ro-RO')}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                {booking.scheduled_time}
+                              </span>
+                            </div>
+                            <p className="text-sm text-slate-500 truncate flex items-center gap-1 mt-1">
+                              <MapPin className="w-3 h-3" />
+                              {booking.address}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-orange-500">{booking.price} lei</p>
+                            <ChevronRight className="w-5 h-5 text-slate-300 ml-auto" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -221,10 +315,15 @@ export default function DashboardPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-600">Progres</span>
-                    <span className="text-sm font-medium text-orange-500">30%</span>
+                    <span className="text-sm font-medium text-orange-500">
+                      {profile?.phone ? '60%' : '30%'}
+                    </span>
                   </div>
                   <div className="w-full bg-slate-100 rounded-full h-2">
-                    <div className="bg-orange-500 h-2 rounded-full" style={{ width: '30%' }}></div>
+                    <div 
+                      className="bg-orange-500 h-2 rounded-full transition-all" 
+                      style={{ width: profile?.phone ? '60%' : '30%' }}
+                    ></div>
                   </div>
                   <ul className="space-y-2 mt-4">
                     <li className="flex items-center gap-2 text-sm">
@@ -232,8 +331,14 @@ export default function DashboardPage() {
                       <span className="text-slate-600">Email verificat</span>
                     </li>
                     <li className="flex items-center gap-2 text-sm">
-                      <div className="w-4 h-4 border-2 border-slate-300 rounded-full"></div>
-                      <span className="text-slate-400">Adaugă număr telefon</span>
+                      {profile?.phone ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <div className="w-4 h-4 border-2 border-slate-300 rounded-full"></div>
+                      )}
+                      <span className={profile?.phone ? 'text-slate-600' : 'text-slate-400'}>
+                        Adaugă număr telefon
+                      </span>
                     </li>
                     <li className="flex items-center gap-2 text-sm">
                       <div className="w-4 h-4 border-2 border-slate-300 rounded-full"></div>
@@ -247,9 +352,11 @@ export default function DashboardPage() {
                     )}
                   </ul>
                 </div>
-                <Button variant="outline" className="w-full mt-4">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Editează profil
+                <Button variant="outline" className="w-full mt-4" asChild>
+                  <Link href="/settings">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Editează profil
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -260,13 +367,21 @@ export default function DashboardPage() {
                 <CardTitle className="text-lg">Link-uri rapide</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="ghost" className="w-full justify-start">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Setări cont
+                <Button variant="ghost" className="w-full justify-start" asChild>
+                  <Link href="/settings">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Setări cont
+                  </Link>
+                </Button>
+                <Button variant="ghost" className="w-full justify-start" asChild>
+                  <Link href="/categories">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Caută servicii
+                  </Link>
                 </Button>
                 <Button variant="ghost" className="w-full justify-start">
                   <MessageCircle className="w-4 h-4 mr-2" />
-                  Mesaje
+                  Mesaje (în curând)
                 </Button>
                 <Button 
                   variant="ghost" 
