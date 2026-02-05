@@ -38,8 +38,8 @@ export default function LoginPage() {
       return;
     }
 
-    router.push('/dashboard');
-    router.refresh();
+    // Use window.location for static export compatibility
+    window.location.href = '/dashboard';
   };
 
   // Google OAuth - coming soon

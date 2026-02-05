@@ -24,7 +24,7 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        router.push('/auth/login');
+        window.location.href = '/auth/login';
         return;
       }
 
@@ -47,8 +47,7 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
+    window.location.href = '/';
   };
 
   if (loading) {
