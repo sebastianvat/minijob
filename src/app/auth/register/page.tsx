@@ -36,7 +36,7 @@ export default function RegisterPage() {
 
     const supabase = createClient();
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -45,7 +45,6 @@ export default function RegisterPage() {
           phone: phone,
           role: userType,
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
@@ -59,6 +58,20 @@ export default function RegisterPage() {
       return;
     }
 
+    // Check if email confirmation is required
+    if (data?.user?.identities?.length === 0) {
+      setError('Există deja un cont cu acest email');
+      setLoading(false);
+      return;
+    }
+
+    // If user is created and session exists, redirect to dashboard
+    if (data?.session) {
+      window.location.href = '/dashboard';
+      return;
+    }
+
+    // Otherwise show success message (email confirmation needed)
     setSuccess(true);
     setLoading(false);
   };
