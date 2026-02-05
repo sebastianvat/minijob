@@ -57,6 +57,7 @@ export default function MyProjectsPage() {
       setUser(user);
 
       // Load user's projects with offers
+      console.log('Loading projects for user:', user.id);
       const { data: projectsData, error } = await (supabase as any)
         .from('projects')
         .select(`
@@ -73,10 +74,12 @@ export default function MyProjectsPage() {
         .eq('client_id', user.id)
         .order('created_at', { ascending: false });
 
+      console.log('Projects loaded:', { projectsData, error });
+
       if (error) {
         console.error('Error loading projects:', error);
       } else {
-        setProjects(projectsData as ProjectWithOffers[]);
+        setProjects(projectsData as ProjectWithOffers[] || []);
       }
 
       setLoading(false);

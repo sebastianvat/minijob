@@ -142,14 +142,18 @@ export default function PostProjectPage() {
     const supabase = createClient();
 
     // Get category ID from database
-    const { data: categoryData } = await supabase
+    console.log('Looking for category:', selectedCategory);
+    const { data: categoryData, error: categoryError } = await supabase
       .from('categories')
       .select('id')
       .eq('slug', selectedCategory)
-      .single() as { data: { id: string } | null };
+      .single() as { data: { id: string } | null; error: any };
+
+    console.log('Category lookup result:', { categoryData, categoryError });
 
     if (!categoryData) {
-      toast.error('Categoria selectată nu a fost găsită.');
+      toast.error('Categoria selectată nu a fost găsită în baza de date. Te rugăm să reîncerci.');
+      console.error('Category not found:', selectedCategory, categoryError);
       setSubmitting(false);
       return;
     }
@@ -190,13 +194,20 @@ export default function PostProjectPage() {
     if (error) {
       toast.error(`Eroare la publicare: ${error.message}`);
       console.error('Project creation error:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       setSubmitting(false);
       return;
     }
 
+    console.log('Project created successfully!');
     setSuccess(true);
     setSubmitting(false);
-    toast.success('Proiect publicat cu succes! Vei primi oferte în curând.');
+    toast.success('Proiect publicat cu succes!');
+    
+    // Redirect to my-projects after 2 seconds
+    setTimeout(() => {
+      window.location.href = '/my-projects';
+    }, 2000);
   };
 
   if (loading) {
