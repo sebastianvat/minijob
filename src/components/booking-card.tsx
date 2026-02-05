@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { Calendar, MessageCircle, Phone, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +16,6 @@ interface BookingCardProps {
 
 export function BookingCard({ providerId, providerName, responseTime, startingPrice = '60 lei' }: BookingCardProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showBookingModal, setShowBookingModal] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,11 +28,11 @@ export function BookingCard({ providerId, providerName, responseTime, startingPr
 
   const handleBooking = () => {
     if (!isLoggedIn) {
-      window.location.href = '/auth/login';
+      window.location.href = `/auth/login?redirect=/book/${providerId}`;
       return;
     }
-    // Show booking confirmation
-    setShowBookingModal(true);
+    // Go to booking page
+    window.location.href = `/book/${providerId}`;
   };
 
   return (
@@ -86,39 +84,6 @@ export function BookingCard({ providerId, providerName, responseTime, startingPr
           </div>
         </CardContent>
       </Card>
-
-      {/* Booking Modal */}
-      {showBookingModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle>Rezervare {providerName}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center gap-2 text-green-700">
-                  <CheckCircle2 className="w-5 h-5" />
-                  <span className="font-medium">Funcționalitate în dezvoltare!</span>
-                </div>
-                <p className="text-sm text-green-600 mt-2">
-                  Sistemul de rezervări va fi disponibil în curând. Între timp, poți contacta prestatorul direct.
-                </p>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => setShowBookingModal(false)}>
-                  Închide
-                </Button>
-                <Button className="flex-1 bg-orange-500 hover:bg-orange-600" asChild>
-                  <Link href="/dashboard">
-                    Mergi la Dashboard
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </>
   );
 }
