@@ -15,6 +15,12 @@ export type BookingStatus = 'pending' | 'confirmed' | 'in_progress' | 'completed
 export type PriceType = 'fixed' | 'hourly' | 'custom'
 export type PaymentMethod = 'cash' | 'card' | 'platform'
 
+// New types for Projects & Skills
+export type ProjectStatus = 'open' | 'in_progress' | 'completed' | 'cancelled'
+export type OfferStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn'
+export type UrgencyLevel = 'urgent' | 'normal' | 'flexible'
+export type SkillLevel = 'new' | 'experienced' | 'expert' | 'master' | 'top_pro'
+
 export interface Database {
   public: {
     Tables: {
@@ -338,6 +344,277 @@ export interface Database {
           created_at?: string
         }
       }
+      // New tables for Projects & Skills
+      skills: {
+        Row: {
+          id: string
+          category_id: string
+          slug: string
+          name: string
+          description: string | null
+          icon: string | null
+          price_unit: string
+          price_min: number | null
+          price_max: number | null
+          active: boolean
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          category_id: string
+          slug: string
+          name: string
+          description?: string | null
+          icon?: string | null
+          price_unit?: string
+          price_min?: number | null
+          price_max?: number | null
+          active?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          category_id?: string
+          slug?: string
+          name?: string
+          description?: string | null
+          icon?: string | null
+          price_unit?: string
+          price_min?: number | null
+          price_max?: number | null
+          active?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+      }
+      provider_skills: {
+        Row: {
+          id: string
+          provider_id: string
+          skill_id: string
+          price: number
+          price_type: PriceType
+          jobs_completed: number
+          rating: number
+          reviews_count: number
+          level: SkillLevel
+          skill_score: number
+          available: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          provider_id: string
+          skill_id: string
+          price: number
+          price_type?: PriceType
+          jobs_completed?: number
+          rating?: number
+          reviews_count?: number
+          level?: SkillLevel
+          skill_score?: number
+          available?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          provider_id?: string
+          skill_id?: string
+          price?: number
+          price_type?: PriceType
+          jobs_completed?: number
+          rating?: number
+          reviews_count?: number
+          level?: SkillLevel
+          skill_score?: number
+          available?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      skill_portfolio: {
+        Row: {
+          id: string
+          provider_skill_id: string
+          photo_url: string
+          title: string | null
+          description: string | null
+          project_date: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          provider_skill_id: string
+          photo_url: string
+          title?: string | null
+          description?: string | null
+          project_date?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          provider_skill_id?: string
+          photo_url?: string
+          title?: string | null
+          description?: string | null
+          project_date?: string | null
+          created_at?: string
+        }
+      }
+      projects: {
+        Row: {
+          id: string
+          client_id: string
+          category_id: string
+          skill_id: string | null
+          title: string
+          description: string
+          photos: string[]
+          budget_min: number | null
+          budget_max: number | null
+          location_city: string
+          location_address: string | null
+          location_lat: number | null
+          location_lng: number | null
+          deadline: string | null
+          urgency: UrgencyLevel
+          status: ProjectStatus
+          offers_count: number
+          accepted_offer_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          category_id: string
+          skill_id?: string | null
+          title: string
+          description: string
+          photos?: string[]
+          budget_min?: number | null
+          budget_max?: number | null
+          location_city: string
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          deadline?: string | null
+          urgency?: UrgencyLevel
+          status?: ProjectStatus
+          offers_count?: number
+          accepted_offer_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          client_id?: string
+          category_id?: string
+          skill_id?: string | null
+          title?: string
+          description?: string
+          photos?: string[]
+          budget_min?: number | null
+          budget_max?: number | null
+          location_city?: string
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          deadline?: string | null
+          urgency?: UrgencyLevel
+          status?: ProjectStatus
+          offers_count?: number
+          accepted_offer_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      project_offers: {
+        Row: {
+          id: string
+          project_id: string
+          provider_id: string
+          provider_skill_id: string | null
+          price: number
+          message: string | null
+          estimated_duration: string | null
+          available_from: string | null
+          includes_materials: boolean
+          status: OfferStatus
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          provider_id: string
+          provider_skill_id?: string | null
+          price: number
+          message?: string | null
+          estimated_duration?: string | null
+          available_from?: string | null
+          includes_materials?: boolean
+          status?: OfferStatus
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          provider_id?: string
+          provider_skill_id?: string | null
+          price?: number
+          message?: string | null
+          estimated_duration?: string | null
+          available_from?: string | null
+          includes_materials?: boolean
+          status?: OfferStatus
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      skill_reviews: {
+        Row: {
+          id: string
+          booking_id: string | null
+          project_id: string | null
+          provider_skill_id: string
+          client_id: string
+          rating: number
+          review_text: string | null
+          photos: string[]
+          would_recommend: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          booking_id?: string | null
+          project_id?: string | null
+          provider_skill_id: string
+          client_id: string
+          rating: number
+          review_text?: string | null
+          photos?: string[]
+          would_recommend?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          booking_id?: string | null
+          project_id?: string | null
+          provider_skill_id?: string
+          client_id?: string
+          rating?: number
+          review_text?: string | null
+          photos?: string[]
+          would_recommend?: boolean
+          created_at?: string
+        }
+      }
     }
   }
 }
@@ -350,6 +627,14 @@ export type Service = Database['public']['Tables']['services']['Row']
 export type Booking = Database['public']['Tables']['bookings']['Row']
 export type Review = Database['public']['Tables']['reviews']['Row']
 export type Message = Database['public']['Tables']['messages']['Row']
+
+// New helper types
+export type Skill = Database['public']['Tables']['skills']['Row']
+export type ProviderSkill = Database['public']['Tables']['provider_skills']['Row']
+export type SkillPortfolio = Database['public']['Tables']['skill_portfolio']['Row']
+export type Project = Database['public']['Tables']['projects']['Row']
+export type ProjectOffer = Database['public']['Tables']['project_offers']['Row']
+export type SkillReview = Database['public']['Tables']['skill_reviews']['Row']
 
 // Extended types with relations
 export type ProviderWithProfile = Provider & {
@@ -368,4 +653,62 @@ export type BookingWithDetails = Booking & {
   category: Category
   reviews: Review[]
   messages: Message[]
+}
+
+// New extended types
+export type SkillWithCategory = Skill & {
+  category: Category
+}
+
+export type ProviderSkillWithDetails = ProviderSkill & {
+  skill: Skill
+  portfolio: SkillPortfolio[]
+  reviews: SkillReview[]
+}
+
+export type ProviderWithSkills = Provider & {
+  profile: Profile
+  skills: ProviderSkillWithDetails[]
+}
+
+export type ProjectWithDetails = Project & {
+  client: Profile
+  category: Category
+  skill: Skill | null
+  offers: ProjectOfferWithProvider[]
+}
+
+export type ProjectOfferWithProvider = ProjectOffer & {
+  provider: ProviderWithProfile
+  provider_skill: ProviderSkillWithDetails | null
+}
+
+// Badge display helpers
+export const SKILL_LEVEL_LABELS: Record<SkillLevel, string> = {
+  new: '🥉 Nou',
+  experienced: '🥈 Experimentat',
+  expert: '🥇 Expert',
+  master: '💎 Master',
+  top_pro: '👑 Top Pro'
+}
+
+export const SKILL_LEVEL_COLORS: Record<SkillLevel, string> = {
+  new: 'bg-slate-100 text-slate-700 border-slate-200',
+  experienced: 'bg-blue-50 text-blue-700 border-blue-200',
+  expert: 'bg-amber-50 text-amber-700 border-amber-200',
+  master: 'bg-purple-50 text-purple-700 border-purple-200',
+  top_pro: 'bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 border-orange-200'
+}
+
+export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
+  open: 'Deschis',
+  in_progress: 'În desfășurare',
+  completed: 'Finalizat',
+  cancelled: 'Anulat'
+}
+
+export const URGENCY_LABELS: Record<UrgencyLevel, string> = {
+  urgent: '🔥 Urgent',
+  normal: '📅 Normal',
+  flexible: '🕐 Flexibil'
 }
