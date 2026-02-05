@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { 
   Zap, ArrowLeft, Star, MapPin, Clock, Calendar,
-  CheckCircle2, MessageCircle, Phone, Share2, Heart,
+  CheckCircle2, Share2, Heart,
   Sparkles, Shield, Award, ThumbsUp
 } from 'lucide-react';
+import { BookingCard } from '@/components/booking-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -332,52 +333,12 @@ export default function ProviderPage({ params }: { params: { id: string } }) {
           {/* Sidebar - Booking Card */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
-              <Card className="border-orange-200 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-lg">Rezervă acest prestator</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-4 bg-orange-50 rounded-lg">
-                    <p className="text-sm text-slate-600 mb-1">Prețuri de la</p>
-                    <p className="text-3xl font-bold text-orange-500">60 lei<span className="text-lg">/h</span></p>
-                  </div>
-
-                  <Button className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-lg" asChild>
-                    <Link href="/auth/login">
-                      <Calendar className="w-5 h-5 mr-2" />
-                      Rezervă acum
-                    </Link>
-                  </Button>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" className="h-12">
-                      <MessageCircle className="w-5 h-5 mr-2" />
-                      Mesaj
-                    </Button>
-                    <Button variant="outline" className="h-12">
-                      <Phone className="w-5 h-5 mr-2" />
-                      Sună
-                    </Button>
-                  </div>
-
-                  <Separator />
-
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center gap-2 text-slate-600">
-                      <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      <span>Răspunde în {provider.responseTime}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-600">
-                      <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      <span>Garanție satisfacție</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-600">
-                      <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      <span>Anulare gratuită cu 24h înainte</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <BookingCard 
+                providerId={provider.id}
+                providerName={provider.name}
+                responseTime={provider.responseTime}
+                startingPrice="60 lei"
+              />
             </div>
           </div>
         </div>
