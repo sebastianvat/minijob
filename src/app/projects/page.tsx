@@ -196,7 +196,7 @@ export default function ProjectsPage() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project) => (
-              <Link key={project.id} href={`/projects/${project.id}`}>
+              <Link key={project.id} href={`/project?id=${project.id}`}>
                 <Card className="bg-white border-slate-200 hover:border-teal-300 hover:shadow-lg transition-all cursor-pointer h-full">
                   <CardContent className="p-5">
                     {/* Category & Urgency */}

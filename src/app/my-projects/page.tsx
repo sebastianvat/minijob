@@ -291,7 +291,7 @@ function ProjectCard({ project, formatDate }: { project: ProjectWithOffers; form
 
           {/* Offers Count */}
           <div className="text-right">
-            <Link href={`/projects/${project.id}`}>
+            <Link href={`/project?id=${project.id}`}>
               <Button variant="outline" size="sm" className="mb-2">
                 <Eye className="w-4 h-4 mr-2" />
                 Vezi detalii
@@ -344,7 +344,7 @@ function ProjectCard({ project, formatDate }: { project: ProjectWithOffers; form
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-orange-500">{offer.price} lei</p>
-                      <Link href={`/projects/${project.id}`}>
+                      <Link href={`/project?id=${project.id}`}>
                         <Button size="sm" variant="ghost" className="text-xs text-teal-600 hover:text-teal-700 h-6 px-2">
                           Detalii →
                         </Button>
@@ -353,7 +353,7 @@ function ProjectCard({ project, formatDate }: { project: ProjectWithOffers; form
                   </div>
                 ))}
                 {project.offers.length > 5 && (
-                  <Link href={`/projects/${project.id}`} className="block text-center">
+                  <Link href={`/project?id=${project.id}`} className="block text-center">
                     <Button variant="link" className="text-teal-600">
                       Vezi toate cele {project.offers.length} oferte
                     </Button>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { 
   Zap, MapPin, Calendar, Clock, ArrowLeft,
   Home, Hammer, Car, Laptop, PawPrint, Baby, Star,
@@ -23,6 +23,10 @@ import {
   Project, Category, Profile, ProjectOffer, Provider,
   URGENCY_LABELS, SKILL_LEVEL_LABELS, SKILL_LEVEL_COLORS, SkillLevel
 } from '@/types/database';
+
+interface ProjectDetailProps {
+  projectId?: string;
+}
 
 // Category icons mapping
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -52,8 +56,13 @@ interface OfferWithProvider extends ProjectOffer {
   };
 }
 
-export function ProjectDetail() {
-  const { id } = useParams<{ id: string }>();
+export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
+  const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
+  
+  // Get ID from props, params, or search params
+  const id = projectId || params?.id || searchParams?.get('id') || '';
+  
   const [project, setProject] = useState<ProjectWithDetails | null>(null);
   const [offers, setOffers] = useState<OfferWithProvider[]>([]);
   const [loading, setLoading] = useState(true);
