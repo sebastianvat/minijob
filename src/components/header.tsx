@@ -9,15 +9,24 @@ import { createClient } from '@/lib/supabase/client';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<{ email?: string } | null>(null);
+  const [user, setUser] = useState<{ email?: string; user_metadata?: Record<string, any> } | null>(null);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+    const supabase = createClient();
+    
+    // Initial check
+    supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
-    };
-    checkUser();
+    });
+
+    // Listen for auth state changes (login, logout, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return (
@@ -44,9 +53,17 @@ export function Header() {
             </Button>
             {user ? (
               <Button className="bg-orange-500 hover:bg-orange-600" asChild>
-                <Link href="/dashboard">
-                  <User className="w-4 h-4 mr-2" />
-                  Contul meu
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  {user.user_metadata?.avatar_url || user.user_metadata?.picture ? (
+                    <img 
+                      src={user.user_metadata.avatar_url || user.user_metadata.picture} 
+                      alt="" 
+                      className="w-5 h-5 rounded-full"
+                    />
+                  ) : (
+                    <User className="w-4 h-4" />
+                  )}
+                  {user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.name?.split(' ')[0] || 'Contul meu'}
                 </Link>
               </Button>
             ) : (
@@ -89,10 +106,19 @@ export function Header() {
           {user ? (
             <Link 
               href="/dashboard" 
-              className="block py-3 px-4 rounded-lg bg-orange-500 text-white text-center font-medium"
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-orange-500 text-white font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
-              Contul meu
+              {user.user_metadata?.avatar_url || user.user_metadata?.picture ? (
+                <img 
+                  src={user.user_metadata.avatar_url || user.user_metadata.picture} 
+                  alt="" 
+                  className="w-5 h-5 rounded-full"
+                />
+              ) : (
+                <User className="w-4 h-4" />
+              )}
+              {user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.name?.split(' ')[0] || 'Contul meu'}
             </Link>
           ) : (
             <>
