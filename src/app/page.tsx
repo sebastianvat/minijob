@@ -53,7 +53,7 @@ export default function Home() {
         .select('id, title, location_city, budget_min, budget_max, offers_count, created_at, category:categories(name, slug)')
         .eq('status', 'open')
         .order('created_at', { ascending: false })
-        .limit(6);
+        .limit(9);
       
       if (data) setProjects(data);
     };
@@ -198,137 +198,145 @@ export default function Home() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════ */}
-      {/* CUM FUNCTIONEAZA - 3 pasi vizuali                          */}
+      {/* PROIECTE ACTIVE - SECTIUNE PRINCIPALA                        */}
       {/* ═══════════════════════════════════════════════════════════ */}
-      <section className="py-16 md:py-20 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
-              Simplu ca 1-2-3
-            </h2>
-            <p className="text-slate-500">Tu descrii, ei oferă, tu alegi</p>
+      <section className="py-16 md:py-20 px-4 bg-gradient-to-b from-white to-slate-50">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-sm font-medium text-green-600">Live</span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-1">
+                Proiecte care așteaptă oferte
+              </h2>
+              <p className="text-slate-500">Clienți reali care caută specialiști chiar acum</p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" asChild>
+                <Link href="/projects">
+                  Vezi toate proiectele
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
+              <Button className="bg-orange-500 hover:bg-orange-600" asChild>
+                <Link href="/post-project">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Postează proiect
+                </Link>
+              </Button>
+            </div>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {/* Step 1 */}
-            <div className="relative">
-              <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center h-full hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white text-xl font-bold">
-                  1
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">Descrii ce ai nevoie</h3>
-                <p className="text-slate-500 text-sm">
-                  Alegi categoria, scrii detalii, adaugi poze și buget. Durează 2 minute.
-                </p>
+          {projects.length > 0 ? (
+            <>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {projects.map((project) => (
+                  <Link key={project.id} href={`/project?id=${project.id}`}>
+                    <Card className="bg-white border-slate-200 hover:border-orange-300 hover:shadow-xl hover:-translate-y-0.5 transition-all cursor-pointer h-full">
+                      <CardContent className="p-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <Badge variant="outline" className="text-xs border-slate-200">
+                            {project.category?.name || 'Altceva'}
+                          </Badge>
+                          <span className="text-xs text-slate-400">{timeAgo(project.created_at)}</span>
+                        </div>
+                        <h3 className="font-semibold text-slate-900 mb-3 line-clamp-2 min-h-[2.5rem]">{project.title}</h3>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1 text-sm text-slate-500">
+                            <MapPin className="w-3.5 h-3.5" />
+                            {project.location_city}
+                          </div>
+                          <span className="font-semibold text-sm">
+                            {project.budget_min && project.budget_max 
+                              ? <span className="text-slate-900">{project.budget_min}-{project.budget_max} lei</span>
+                              : <span className="text-orange-500">Așteaptă oferte</span>
+                            }
+                          </span>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                          <Badge className="bg-teal-50 text-teal-600 border-teal-200 text-xs">
+                            <MessageCircle className="w-3 h-3 mr-1" />
+                            {project.offers_count} oferte
+                          </Badge>
+                          <span className="text-xs text-orange-500 font-medium flex items-center gap-1">
+                            Fă o ofertă <ArrowRight className="w-3 h-3" />
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
               </div>
-              <div className="hidden md:block absolute top-1/2 -right-3 text-slate-300">
-                <ChevronRight className="w-6 h-6" />
-              </div>
-            </div>
 
-            {/* Step 2 */}
-            <div className="relative">
-              <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center h-full hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 bg-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white text-xl font-bold">
-                  2
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">Primești oferte</h3>
-                <p className="text-slate-500 text-sm">
-                  Specialiștii îți trimit oferte cu preț, disponibilitate și portofoliu.
+              <div className="text-center mt-8">
+                <Button size="lg" variant="outline" asChild>
+                  <Link href="/projects">
+                    Vezi toate proiectele active
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Link>
+                </Button>
+              </div>
+            </>
+          ) : (
+            <Card className="border-slate-200 border-dashed">
+              <CardContent className="py-12 text-center">
+                <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">Fii primul care postează!</h3>
+                <p className="text-slate-500 mb-6 max-w-md mx-auto">
+                  Descrie ce ai nevoie și specialiștii îți vor trimite oferte cu prețul lor.
                 </p>
-              </div>
-              <div className="hidden md:block absolute top-1/2 -right-3 text-slate-300">
-                <ChevronRight className="w-6 h-6" />
-              </div>
-            </div>
+                <Button className="bg-orange-500 hover:bg-orange-600" asChild>
+                  <Link href="/post-project">
+                    <FileText className="w-4 h-4 mr-2" />
+                    Postează primul proiect
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </section>
 
-            {/* Step 3 */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* CUM FUNCTIONEAZA - compact, 3 pasi                         */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <section className="py-14 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
+              Cum funcționează?
+            </h2>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="relative">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center h-full hover:shadow-lg transition-shadow">
+                <div className="w-11 h-11 bg-orange-500 rounded-xl flex items-center justify-center mx-auto mb-4 text-white text-lg font-bold">1</div>
+                <h3 className="font-bold text-slate-900 mb-1">Postezi proiectul</h3>
+                <p className="text-slate-500 text-sm">Descrii ce ai nevoie, cu sau fără buget. 2 minute.</p>
+              </div>
+              <div className="hidden md:block absolute top-1/2 -right-3 text-slate-300"><ChevronRight className="w-5 h-5" /></div>
+            </div>
+            <div className="relative">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center h-full hover:shadow-lg transition-shadow">
+                <div className="w-11 h-11 bg-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4 text-white text-lg font-bold">2</div>
+                <h3 className="font-bold text-slate-900 mb-1">Primești oferte</h3>
+                <p className="text-slate-500 text-sm">Specialiștii fac oferte sigilate cu prețul lor.</p>
+              </div>
+              <div className="hidden md:block absolute top-1/2 -right-3 text-slate-300"><ChevronRight className="w-5 h-5" /></div>
+            </div>
             <div>
-              <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center h-full hover:shadow-lg transition-shadow">
-                <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white text-xl font-bold">
-                  3
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">Alegi și gata</h3>
-                <p className="text-slate-500 text-sm">
-                  Compari rating, portofoliu și preț. Tu decizi de la cine cumperi.
-                </p>
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center h-full hover:shadow-lg transition-shadow">
+                <div className="w-11 h-11 bg-slate-900 rounded-xl flex items-center justify-center mx-auto mb-4 text-white text-lg font-bold">3</div>
+                <h3 className="font-bold text-slate-900 mb-1">Alegi și gata</h3>
+                <p className="text-slate-500 text-sm">Compari preț, rating, portofoliu. Tu decizi.</p>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-      {/* ═══════════════════════════════════════════════════════════ */}
-      {/* PROIECTE RECENTE - live din Supabase                       */}
-      {/* ═══════════════════════════════════════════════════════════ */}
-      {projects.length > 0 && (
-        <section className="py-16 md:py-20 px-4 bg-slate-50/50">
-          <div className="container mx-auto">
-            <div className="flex items-center justify-between mb-8 max-w-5xl mx-auto">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-1">
-                  Proiecte recente
-                </h2>
-                <p className="text-slate-500 text-sm">Proiecte postate de clienți care așteaptă oferte</p>
-              </div>
-              <Button variant="outline" className="hidden sm:flex" asChild>
-                <Link href="/projects">
-                  Vezi toate
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
-            </div>
-            
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-              {projects.map((project) => (
-                <Link key={project.id} href={`/project?id=${project.id}`}>
-                  <Card className="bg-white border-slate-200 hover:border-orange-200 hover:shadow-lg transition-all cursor-pointer h-full">
-                    <CardContent className="p-5">
-                      <div className="flex items-center justify-between mb-3">
-                        <Badge variant="outline" className="text-xs border-slate-200">
-                          {project.category?.name || 'Altceva'}
-                        </Badge>
-                        <span className="text-xs text-slate-400">{timeAgo(project.created_at)}</span>
-                      </div>
-                      <h3 className="font-semibold text-slate-900 mb-3 line-clamp-2">{project.title}</h3>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-sm text-slate-500">
-                          <MapPin className="w-3.5 h-3.5" />
-                          {project.location_city}
-                        </div>
-                        <span className="font-semibold text-slate-900 text-sm">
-                          {project.budget_min && project.budget_max 
-                            ? `${project.budget_min}-${project.budget_max} lei`
-                            : 'Cere ofertă'
-                          }
-                        </span>
-                      </div>
-                      <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-                        <Badge className="bg-teal-50 text-teal-600 border-teal-200 text-xs">
-                          <MessageCircle className="w-3 h-3 mr-1" />
-                          {project.offers_count} oferte
-                        </Badge>
-                        <span className="text-xs text-orange-500 font-medium">
-                          Vezi detalii →
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-
-            <div className="text-center mt-8">
-              <Button className="bg-orange-500 hover:bg-orange-600" asChild>
-                <Link href="/post-project">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Postează și tu un proiect
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ═══════════════════════════════════════════════════════════ */}
       {/* DE CE MINIJOB - Trust elements                             */}
@@ -542,7 +550,7 @@ export default function Home() {
               <h4 className="font-semibold text-white mb-4 text-sm">Platformă</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
                 <li><Link href="/post-project" className="hover:text-teal-400 transition-colors">Postează proiect</Link></li>
-                <li><Link href="/auth/register" className="hover:text-teal-400 transition-colors">Devino specialist</Link></li>
+                <li><Link href="/devino-specialist" className="hover:text-teal-400 transition-colors">Devino specialist</Link></li>
                 <li><Link href="/projects" className="hover:text-teal-400 transition-colors">Proiecte active</Link></li>
               </ul>
             </div>
