@@ -72,7 +72,7 @@ export function Header() {
                   <Link href="/auth/login">Intră în cont</Link>
                 </Button>
                 <Button className="bg-orange-500 hover:bg-orange-600" asChild>
-                  <Link href="/auth/register">Devino prestator</Link>
+                  <Link href="/devino-specialist">Devino specialist</Link>
                 </Button>
               </>
             )}
@@ -130,11 +130,11 @@ export function Header() {
                 Intră în cont
               </Link>
               <Link 
-                href="/auth/register" 
+                href="/devino-specialist" 
                 className="block py-3 px-4 rounded-lg bg-orange-500 text-white text-center font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Devino prestator
+                Devino specialist
               </Link>
             </>
           )}

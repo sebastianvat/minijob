@@ -25,10 +25,15 @@ export default function AuthCallbackPage() {
       }
 
       if (session) {
+        // Check role from URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role') || 'client';
+        const isProvider = role === 'provider';
+
         // Check if this is a new user (no profile yet) and create one
         const { data: profile } = await supabase
           .from('profiles')
-          .select('id')
+          .select('id, role')
           .eq('id', session.user.id)
           .single();
 
@@ -40,12 +45,12 @@ export default function AuthCallbackPage() {
             full_name: meta?.full_name || meta?.name || null,
             avatar_url: meta?.avatar_url || meta?.picture || null,
             email: session.user.email,
-            role: 'client', // Default role for Google signups
+            role: isProvider ? 'provider' : 'client',
           });
         }
 
-        // Redirect to dashboard
-        window.location.href = '/dashboard/';
+        // Redirect providers to onboarding, clients to dashboard
+        window.location.href = isProvider ? '/onboarding/' : '/dashboard/';
       } else {
         // No session found, might need to wait for hash processing
         // Try listening for auth state change

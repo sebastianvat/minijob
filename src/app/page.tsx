@@ -458,7 +458,7 @@ export default function Home() {
                   </div>
 
                   <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white h-12 px-8" asChild>
-                    <Link href="/auth/register">
+                    <Link href="/devino-specialist">
                       Înscrie-te gratuit
                       <ArrowRight className="ml-2 w-5 h-5" />
                     </Link>

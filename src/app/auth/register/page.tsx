@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { Zap, Mail, Lock, User, Phone, ArrowRight, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,9 +12,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter();
-  const [userType, setUserType] = useState<'client' | 'provider'>('client');
+  const searchParams = useSearchParams();
+  const typeParam = searchParams?.get('type');
+  const [userType, setUserType] = useState<'client' | 'provider'>(typeParam === 'provider' ? 'provider' : 'client');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -65,9 +68,9 @@ export default function RegisterPage() {
       return;
     }
 
-    // If user is created and session exists, redirect to dashboard
+    // If user is created and session exists, redirect based on type
     if (data?.session) {
-      window.location.href = '/dashboard';
+      window.location.href = userType === 'provider' ? '/onboarding' : '/dashboard';
       return;
     }
 
@@ -84,7 +87,7 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback/`,
+        redirectTo: `${window.location.origin}/auth/callback/?role=${userType}`,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
@@ -301,5 +304,17 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500" />
+      </div>
+    }>
+      <RegisterContent />
+    </Suspense>
   );
 }
