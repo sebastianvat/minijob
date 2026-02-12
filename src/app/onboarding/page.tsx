@@ -562,8 +562,8 @@ export default function OnboardingPage() {
                         className="hidden"
                         onChange={(e) => {
                           if (e.target.files) {
-                            const newPhotos = Array.from(e.target.files).map((_, i) =>
-                              `https://picsum.photos/400/400?random=${Date.now() + i}`
+                            const newPhotos = Array.from(e.target.files).map((file) =>
+                              URL.createObjectURL(file)
                             );
                             setPortfolioPhotos(prev => [...prev, ...newPhotos].slice(0, 9));
                           }
