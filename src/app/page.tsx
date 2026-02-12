@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/header";
 import { createClient } from '@/lib/supabase/client';
-import { getProjectUrl } from '@/lib/utils';
+import { getProjectUrl, formatBudget } from '@/lib/utils';
 
 // Skill Zones config
 const skillZones = [
@@ -250,10 +250,12 @@ export default function Home() {
                             {project.location_city}
                           </div>
                           <span className="font-semibold text-sm">
-                            {project.budget_min && project.budget_max 
-                              ? <span className="text-slate-900">{project.budget_min}-{project.budget_max} lei</span>
-                              : <span className="text-orange-500">Așteaptă oferte</span>
-                            }
+                            {(() => {
+                              const b = formatBudget(project.budget_min, project.budget_max);
+                              return b.hasValue
+                                ? <span className="text-slate-900">{b.text}</span>
+                                : <span className="text-orange-500">{b.text}</span>;
+                            })()}
                           </span>
                         </div>
                         <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">

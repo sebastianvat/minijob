@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { createClient } from '@/lib/supabase/client';
 import { Header } from '@/components/header';
-import { getProjectUrl } from '@/lib/utils';
+import { getProjectUrl, formatBudget } from '@/lib/utils';
 import { 
   Project, Category, ProjectOffer, Provider, Profile,
   URGENCY_LABELS, PROJECT_STATUS_LABELS, ProjectStatus
@@ -282,11 +282,12 @@ function ProjectCard({ project, formatDate }: { project: ProjectWithOffers; form
                 <Calendar className="w-4 h-4" />
                 {formatDate(project.created_at)}
               </span>
-              {project.budget_min && project.budget_max && (
-                <span className="font-medium text-slate-900">
-                  {project.budget_min} - {project.budget_max} lei
-                </span>
-              )}
+              {(() => {
+                const b = formatBudget(project.budget_min, project.budget_max);
+                return b.hasValue
+                  ? <span className="font-medium text-slate-900">{b.text}</span>
+                  : <span className="text-orange-500 text-sm">{b.text}</span>;
+              })()}
             </div>
           </div>
 

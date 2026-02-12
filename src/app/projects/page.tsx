@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createClient } from '@/lib/supabase/client';
 import { Header } from '@/components/header';
-import { getProjectUrl } from '@/lib/utils';
+import { getProjectUrl, formatBudget } from '@/lib/utils';
 import { Project, Category, URGENCY_LABELS } from '@/types/database';
 
 // Category icons mapping
@@ -263,13 +263,14 @@ export default function ProjectsPage() {
                     {/* Budget & Offers */}
                     <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                       <div>
-                        {project.budget_min && project.budget_max ? (
-                          <span className="font-semibold text-slate-900">
-                            {project.budget_min} - {project.budget_max} lei
-                          </span>
-                        ) : (
-                          <span className="text-slate-500">Buget nedefinit</span>
-                        )}
+                        {(() => {
+                          const b = formatBudget(project.budget_min, project.budget_max);
+                          return b.hasValue ? (
+                            <span className="font-semibold text-slate-900">{b.text}</span>
+                          ) : (
+                            <span className="text-orange-500">{b.text}</span>
+                          );
+                        })()}
                       </div>
                       <Badge className="bg-teal-50 text-teal-600 border-teal-200">
                         <MessageCircle className="w-3 h-3 mr-1" />

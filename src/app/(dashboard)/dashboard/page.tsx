@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { createClient } from '@/lib/supabase/client';
-import { getProjectUrl } from '@/lib/utils';
+import { getProjectUrl, formatBudget } from '@/lib/utils';
 
 interface Booking {
   id: string;
@@ -312,9 +312,7 @@ export default function DashboardPage() {
                                   <span className="flex items-center gap-1">
                                     <MapPin className="w-3 h-3" />{project.location_city}
                                   </span>
-                                  {project.budget_max && (
-                                    <span>Buget: {project.budget_min || 0} - {project.budget_max} lei</span>
-                                  )}
+                                  <span>{formatBudget(project.budget_min, project.budget_max).text}</span>
                                   <span>{project.offers_count} oferte</span>
                                 </div>
                               </div>
@@ -491,9 +489,7 @@ export default function DashboardPage() {
                                   <span className="flex items-center gap-1">
                                     <MapPin className="w-3 h-3" />{project.location_city}
                                   </span>
-                                  {project.budget_max && (
-                                    <span>Buget: {project.budget_min || 0} - {project.budget_max} lei</span>
-                                  )}
+                                  <span>{formatBudget(project.budget_min, project.budget_max).text}</span>
                                   <span className="font-medium text-orange-500">{project.offers_count} oferte</span>
                                 </div>
                               </div>

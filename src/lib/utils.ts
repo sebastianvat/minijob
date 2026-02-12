@@ -27,6 +27,22 @@ export function generateSlug(text: string): string {
 }
 
 /**
+ * Format project budget display.
+ */
+export function formatBudget(budgetMin: number | null, budgetMax: number | null): { text: string; hasValue: boolean } {
+  if (budgetMin && budgetMax) {
+    return { text: `${budgetMin} - ${budgetMax} lei`, hasValue: true };
+  }
+  if (budgetMax) {
+    return { text: `Max ${budgetMax} lei`, hasValue: true };
+  }
+  if (budgetMin) {
+    return { text: `De la ${budgetMin} lei`, hasValue: true };
+  }
+  return { text: 'Așteaptă oferte', hasValue: false };
+}
+
+/**
  * Get the project URL path with a readable slug in the URL.
  * Always uses ID for lookup, slug is decorative for readability.
  */
