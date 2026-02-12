@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/header";
 import { createClient } from '@/lib/supabase/client';
+import { getProjectUrl } from '@/lib/utils';
 
 // Skill Zones config
 const skillZones = [
@@ -233,7 +234,7 @@ export default function Home() {
             <>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {projects.map((project) => (
-                  <Link key={project.id} href={`/project?id=${project.id}`}>
+                  <Link key={project.id} href={getProjectUrl(project)}>
                     <Card className="bg-white border-slate-200 hover:border-orange-300 hover:shadow-xl hover:-translate-y-0.5 transition-all cursor-pointer h-full">
                       <CardContent className="p-5">
                         <div className="flex items-center justify-between mb-3">

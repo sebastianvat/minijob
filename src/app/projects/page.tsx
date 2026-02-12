@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createClient } from '@/lib/supabase/client';
 import { Header } from '@/components/header';
+import { getProjectUrl } from '@/lib/utils';
 import { Project, Category, URGENCY_LABELS } from '@/types/database';
 
 // Category icons mapping
@@ -196,7 +197,7 @@ export default function ProjectsPage() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project) => (
-              <Link key={project.id} href={`/project?id=${project.id}`}>
+              <Link key={project.id} href={getProjectUrl(project)}>
                 <Card className="bg-white border-slate-200 hover:border-teal-300 hover:shadow-lg transition-all cursor-pointer h-full">
                   <CardContent className="p-5">
                     {/* Category & Urgency */}

@@ -185,6 +185,9 @@ export default function PostProjectPage() {
 
     // Upload photos to Supabase Storage
     let uploadedPhotoUrls: string[] = [];
+    // #region agent log
+    fetch('http://localhost:7242/ingest/634abb5f-2f5a-4519-b060-6a93159490ba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'post-project/page.tsx:upload-start',message:'Photo upload starting',data:{photoFilesCount:photoFiles.length,fileNames:photoFiles.map(f=>f.name),fileSizes:photoFiles.map(f=>f.size)},timestamp:Date.now(),hypothesisId:'H1-upload'})}).catch(()=>{});
+    // #endregion
     if (photoFiles.length > 0) {
       for (let i = 0; i < photoFiles.length; i++) {
         const file = photoFiles[i];
@@ -193,12 +196,20 @@ export default function PostProjectPage() {
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('portfolio')
           .upload(path, file, { cacheControl: '3600', upsert: false });
+        // #region agent log
+        fetch('http://localhost:7242/ingest/634abb5f-2f5a-4519-b060-6a93159490ba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'post-project/page.tsx:upload-result',message:'Single file upload result',data:{index:i,path,uploadData,uploadError:uploadError?.message||null,hasData:!!uploadData},timestamp:Date.now(),hypothesisId:'H2-bucket'})}).catch(()=>{});
+        // #endregion
         if (uploadData && !uploadError) {
           const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path);
+          // #region agent log
+          fetch('http://localhost:7242/ingest/634abb5f-2f5a-4519-b060-6a93159490ba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'post-project/page.tsx:public-url',message:'Got public URL',data:{index:i,publicUrl},timestamp:Date.now(),hypothesisId:'H3-url'})}).catch(()=>{});
+          // #endregion
           uploadedPhotoUrls.push(publicUrl);
         }
       }
     }
+    // #region agent log
+    fetch('http://localhost:7242/ingest/634abb5f-2f5a-4519-b060-6a93159490ba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'post-project/page.tsx:upload-done',message:'All uploads done',data:{uploadedPhotoUrls,totalUploaded:uploadedPhotoUrls.length},timestamp:Date.now(),hypothesisId:'H1-upload'})}).catch(()=>{});
 
     // Create project
     const { error } = await (supabase as any)

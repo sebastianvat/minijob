@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { createClient } from '@/lib/supabase/client';
+import { getProjectUrl } from '@/lib/utils';
 
 interface Booking {
   id: string;
@@ -301,7 +302,7 @@ export default function DashboardPage() {
                         {projects.slice(0, 5).map((project) => {
                           const pStatus = projectStatusConfig[project.status] || projectStatusConfig.open;
                           return (
-                            <Link key={project.id} href={`/project?id=${project.id}`}>
+                            <Link key={project.id} href={getProjectUrl(project)}>
                               <div className="p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
                                 <div className="flex items-start justify-between mb-2">
                                   <h4 className="font-medium text-slate-900 text-sm line-clamp-1">{project.title}</h4>
@@ -480,7 +481,7 @@ export default function DashboardPage() {
                         {projects.map((project) => {
                           const pStatus = projectStatusConfig[project.status] || projectStatusConfig.open;
                           return (
-                            <Link key={project.id} href={`/project?id=${project.id}`}>
+                            <Link key={project.id} href={getProjectUrl(project)}>
                               <div className="p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
                                 <div className="flex items-start justify-between mb-2">
                                   <h4 className="font-medium text-slate-900 text-sm">{project.title}</h4>

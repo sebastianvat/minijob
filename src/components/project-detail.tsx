@@ -26,6 +26,7 @@ import {
 
 interface ProjectDetailProps {
   projectId?: string;
+  projectSlug?: string;
 }
 
 // Category icons mapping
@@ -56,7 +57,7 @@ interface OfferWithProvider extends ProjectOffer {
   };
 }
 
-export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
+export function ProjectDetail({ projectId, projectSlug }: ProjectDetailProps = {}) {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   
@@ -106,8 +107,8 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
         
         setIsProvider(!!providerData);
 
-        // Check if user already made an offer
-        if (providerData) {
+        // Check if user already made an offer (will check after project loads)
+        if (providerData && id) {
           const { data: existingOffer } = await (supabase as any)
             .from('project_offers')
             .select('id')
@@ -119,7 +120,7 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
         }
       }
 
-      // Load project details
+      // Load project details by id
       const { data: projectData, error: projectError } = await (supabase as any)
         .from('projects')
         .select(`
@@ -133,6 +134,15 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
       if (projectError) {
         console.error('Error loading project:', projectError);
       } else {
+        // Filter out invalid/placeholder photos (old picsum URLs)
+        if (projectData?.photos && Array.isArray(projectData.photos)) {
+          projectData.photos = projectData.photos.filter((url: string) => 
+            url && !url.includes('picsum.photos') && !url.includes('placeholder') && url.startsWith('http')
+          );
+        }
+        // #region agent log
+        fetch('http://localhost:7242/ingest/634abb5f-2f5a-4519-b060-6a93159490ba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'project-detail.tsx:loaded',message:'Project loaded - checking photos',data:{projectId:projectData?.id,slug:projectData?.slug,photos:projectData?.photos,photosType:typeof projectData?.photos,photosLength:projectData?.photos?.length},timestamp:Date.now(),hypothesisId:'H4-stored'})}).catch(()=>{});
+        // #endregion
         setProject(projectData as ProjectWithDetails);
       }
 
@@ -147,7 +157,7 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
               profile:profiles(*)
             )
           `)
-          .eq('project_id', id)
+          .eq('project_id', projectData.id)
           .order('created_at', { ascending: false });
 
         if (offersData) {
@@ -195,7 +205,7 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
     const { error } = await (supabase as any)
       .from('project_offers')
       .insert({
-        project_id: id,
+        project_id: project!.id,
         provider_id: providerData.id,
         price: parseInt(offerPrice),
         message: offerMessage,
@@ -229,7 +239,7 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
     await (supabase as any)
       .from('project_offers')
       .update({ status: 'rejected' })
-      .eq('project_id', id)
+      .eq('project_id', project!.id)
       .neq('id', offerId)
       .eq('status', 'pending');
 
@@ -237,7 +247,7 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
     await (supabase as any)
       .from('projects')
       .update({ status: 'in_progress', accepted_offer_id: offerId })
-      .eq('id', id);
+      .eq('id', project!.id);
 
     toast.success('Ofertă acceptată! Specialistul va fi notificat.');
     
@@ -704,8 +714,10 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
                   <p className="text-sm text-slate-600 mb-4">
                     Ai primit {project.offers_count} oferte. Verifică-le și alege specialistul potrivit!
                   </p>
-                  <Button variant="outline" className="w-full">
-                    Editează proiectul
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href={`/edit-project?id=${project.id}`}>
+                      Editează proiectul
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
