@@ -29,49 +29,11 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   altceva: <Zap className="w-6 h-6" />,
 };
 
-// Mock categories until we run migration
-const MOCK_CATEGORIES: Category[] = [
-  { id: '1', slug: 'casa', name: 'Casă', description: 'Curățenie, gătit, organizare, menaj', icon: 'Home', price_type: 'hourly', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 1, created_at: '' },
-  { id: '2', slug: 'constructii', name: 'Construcții', description: 'Zugrăvit, parchet, renovări, reparații', icon: 'Hammer', price_type: 'custom', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: false, active: true, sort_order: 2, created_at: '' },
-  { id: '3', slug: 'auto', name: 'Auto', description: 'Detailing, polish, mecanică ușoară', icon: 'Car', price_type: 'fixed', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 3, created_at: '' },
-  { id: '4', slug: 'tech', name: 'Tech Jobs', description: 'Social media, data entry, tech support', icon: 'Laptop', price_type: 'hourly', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 4, created_at: '' },
-  { id: '5', slug: 'pets', name: 'Pet Care', description: 'Plimbat câini, pet sitting', icon: 'PawPrint', price_type: 'hourly', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 5, created_at: '' },
-  { id: '6', slug: 'kids', name: 'Kids & Learning', description: 'Bonă, meditații, skill-uri noi', icon: 'Baby', price_type: 'hourly', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: true, active: true, sort_order: 6, created_at: '' },
-  { id: '7', slug: 'altceva', name: 'Altceva', description: 'Ai nevoie de altceva? Spune-ne!', icon: 'Zap', price_type: 'custom', price_min: null, price_max: null, duration_min: null, duration_max: null, instant_booking: false, active: true, sort_order: 7, created_at: '' },
-];
-
-// Mock skills per category (no hardcoded prices - specialists will set their own)
-const MOCK_SKILLS: Record<string, Skill[]> = {
-  'casa': [
-    { id: 's1', category_id: '1', slug: 'curatenie-generala', name: 'Curățenie Generală', description: 'Curățenie standard', icon: 'Sparkles', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
-    { id: 's2', category_id: '1', slug: 'curatenie-dupa-constructor', name: 'Curățenie după Constructor', description: 'Curățenie intensivă', icon: 'Sparkles', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
-    { id: 's3', category_id: '1', slug: 'gatit', name: 'Gătit', description: 'Preparare mese', icon: 'ChefHat', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 3, created_at: '' },
-  ],
-  'constructii': [
-    { id: 's4', category_id: '2', slug: 'zugravit', name: 'Zugrăvit', description: 'Zugrăvit interior/exterior', icon: 'PaintBucket', price_unit: 'mp', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
-    { id: 's5', category_id: '2', slug: 'parchet', name: 'Montaj Parchet', description: 'Instalare parchet', icon: 'Layers', price_unit: 'mp', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
-    { id: 's6', category_id: '2', slug: 'montaj-mobila', name: 'Montaj Mobilă', description: 'Asamblare mobilier', icon: 'Package', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 3, created_at: '' },
-    { id: 's7', category_id: '2', slug: 'instalatii-sanitare', name: 'Instalații Sanitare', description: 'Montaj/reparații', icon: 'Droplet', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 4, created_at: '' },
-  ],
-  'auto': [
-    { id: 's8', category_id: '3', slug: 'detailing', name: 'Detailing Auto', description: 'Curățare profesională', icon: 'CarFront', price_unit: 'bucata', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
-    { id: 's9', category_id: '3', slug: 'polish', name: 'Polish Auto', description: 'Polish și ceruire', icon: 'Sparkle', price_unit: 'bucata', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
-  ],
-  'tech': [
-    { id: 's10', category_id: '4', slug: 'social-media', name: 'Social Media', description: 'Gestionare conturi', icon: 'MessageCircle', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
-    { id: 's11', category_id: '4', slug: 'tech-support', name: 'Tech Support', description: 'Ajutor tehnic', icon: 'Monitor', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
-  ],
-  'pets': [
-    { id: 's12', category_id: '5', slug: 'plimbat-caini', name: 'Plimbat Câini', description: 'Plimbări zilnice', icon: 'Dog', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
-    { id: 's13', category_id: '5', slug: 'pet-sitting', name: 'Pet Sitting', description: 'Îngrijire la domiciliu', icon: 'Home', price_unit: 'zi', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
-  ],
-  'kids': [
-    { id: 's14', category_id: '6', slug: 'bona', name: 'Bonă', description: 'Supraveghere copii', icon: 'Baby', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
-    { id: 's15', category_id: '6', slug: 'meditatii-matematica', name: 'Meditații Matematică', description: 'Pregătire matematică', icon: 'Calculator', price_unit: 'ora', price_min: null, price_max: null, active: true, sort_order: 2, created_at: '' },
-  ],
-  'altceva': [
-    { id: 's16', category_id: '7', slug: 'proiect-special', name: 'Proiect Special', description: 'Descrie ce ai nevoie', icon: 'Zap', price_unit: 'proiect', price_min: null, price_max: null, active: true, sort_order: 1, created_at: '' },
-  ],
+// "Altceva" category for custom projects (always available as fallback)
+const ALTCEVA_CATEGORY: Category = {
+  id: 'altceva', slug: 'altceva', name: 'Altceva', description: 'Ai nevoie de altceva? Spune-ne!',
+  icon: 'Zap', price_type: 'custom', price_min: null, price_max: null,
+  duration_min: null, duration_max: null, instant_booking: false, active: true, sort_order: 99, created_at: ''
 };
 
 export default function PostProjectPage() {
@@ -81,6 +43,11 @@ export default function PostProjectPage() {
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
   
+  // Data from Supabase
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [skillsByCategory, setSkillsByCategory] = useState<Record<string, Skill[]>>({});
+  const [loadingSkills, setLoadingSkills] = useState(false);
+
   // Form state
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSkill, setSelectedSkill] = useState<string>('');
@@ -95,26 +62,68 @@ export default function PostProjectPage() {
   const [urgency, setUrgency] = useState<UrgencyLevel>('normal');
 
   // Get skills for selected category
-  const availableSkills = selectedCategory ? MOCK_SKILLS[selectedCategory] || [] : [];
-  const selectedCategoryData = MOCK_CATEGORIES.find(c => c.slug === selectedCategory);
+  const availableSkills = selectedCategory ? skillsByCategory[selectedCategory] || [] : [];
+  const allCategories = [...categories, ...(categories.some(c => c.slug === 'altceva') ? [] : [ALTCEVA_CATEGORY])];
+  const selectedCategoryData = allCategories.find(c => c.slug === selectedCategory);
   const selectedSkillData = availableSkills.find(s => s.slug === selectedSkill);
 
   useEffect(() => {
-    const checkUser = async () => {
+    const init = async () => {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
       
+      // Check user auth
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         window.location.href = '/auth/login?redirect=/post-project';
         return;
       }
-      
       setUser(user);
+
+      // Load categories from Supabase
+      const { data: categoriesData } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('active', true)
+        .order('sort_order');
+      
+      if (categoriesData && categoriesData.length > 0) {
+        setCategories(categoriesData);
+      }
+      
       setLoading(false);
     };
     
-    checkUser();
+    init();
   }, []);
+
+  // Load skills when category changes
+  useEffect(() => {
+    if (!selectedCategory || selectedCategory === 'altceva') return;
+    if (skillsByCategory[selectedCategory]) return; // Already loaded
+
+    const loadSkills = async () => {
+      setLoadingSkills(true);
+      const supabase = createClient();
+      
+      // Find category ID
+      const cat = allCategories.find(c => c.slug === selectedCategory);
+      if (!cat) { setLoadingSkills(false); return; }
+      
+      const { data: skillsData } = await supabase
+        .from('skills')
+        .select('*')
+        .eq('category_id', cat.id)
+        .eq('active', true)
+        .order('sort_order');
+      
+      if (skillsData) {
+        setSkillsByCategory(prev => ({ ...prev, [selectedCategory]: skillsData }));
+      }
+      setLoadingSkills(false);
+    };
+
+    loadSkills();
+  }, [selectedCategory]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     // In production, upload to Cloudflare R2
@@ -318,7 +327,7 @@ export default function PostProjectPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-                  {MOCK_CATEGORIES.map((cat) => (
+                  {allCategories.map((cat) => (
                     <button
                       key={cat.slug}
                       onClick={() => {
@@ -341,23 +350,35 @@ export default function PostProjectPage() {
                 </div>
 
                 {/* Skill selection */}
-                {selectedCategory && availableSkills.length > 0 && (
+                {selectedCategory && selectedCategory !== 'altceva' && (
                   <div className="mt-6">
                     <Label className="text-sm font-medium text-slate-700 mb-2 block">
                       Specifică serviciul (opțional)
                     </Label>
-                    <Select value={selectedSkill} onValueChange={setSelectedSkill}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Alege un serviciu specific..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableSkills.map((skill) => (
-                          <SelectItem key={skill.slug} value={skill.slug}>
-                            {skill.name} ({skill.price_min}-{skill.price_max} lei/{skill.price_unit})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {loadingSkills ? (
+                      <div className="flex items-center gap-2 text-sm text-slate-500 py-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
+                        Se încarcă serviciile...
+                      </div>
+                    ) : availableSkills.length > 0 ? (
+                      <Select value={selectedSkill} onValueChange={setSelectedSkill}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Alege un serviciu specific..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableSkills.map((skill) => (
+                            <SelectItem key={skill.slug} value={skill.slug}>
+                              {skill.name}
+                              {skill.price_unit ? ` (per ${skill.price_unit})` : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <p className="text-sm text-slate-500 py-2">
+                        Nu sunt servicii specifice pentru această categorie. Descrie în detaliu ce ai nevoie în pasul următor.
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -460,9 +481,9 @@ export default function PostProjectPage() {
                       />
                     </div>
                   </div>
-                  {selectedSkillData && (
+                  {selectedSkillData && selectedSkillData.price_min && selectedSkillData.price_max && (
                     <p className="text-xs text-teal-600">
-                      💡 Prețul mediu pentru {selectedSkillData.name}: {selectedSkillData.price_min}-{selectedSkillData.price_max} lei/{selectedSkillData.price_unit}
+                      Prețul mediu pentru {selectedSkillData.name}: {selectedSkillData.price_min}-{selectedSkillData.price_max} lei/{selectedSkillData.price_unit}
                     </p>
                   )}
                 </div>
