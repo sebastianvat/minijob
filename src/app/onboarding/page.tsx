@@ -58,8 +58,9 @@ export default function OnboardingPage() {
   // Step 3: Pricing
   const [serviceRadius, setServiceRadius] = useState('15');
 
-  // Step 4: Portfolio (placeholder for now)
-  const [portfolioPhotos, setPortfolioPhotos] = useState<string[]>([]);
+  // Step 4: Portfolio - real files + preview URLs
+  const [portfolioFiles, setPortfolioFiles] = useState<File[]>([]);
+  const [portfolioPreviews, setPortfolioPreviews] = useState<string[]>([]);
 
   useEffect(() => {
     const init = async () => {
@@ -177,6 +178,45 @@ export default function OnboardingPage() {
         await (supabase as any)
           .from('provider_skills')
           .upsert(skillInserts, { onConflict: 'provider_id,skill_id' });
+      }
+
+      // 4. Upload portfolio photos to Supabase Storage
+      if (portfolioFiles.length > 0 && providerData) {
+        const uploadedUrls: string[] = [];
+
+        for (let i = 0; i < portfolioFiles.length; i++) {
+          const file = portfolioFiles[i];
+          const ext = file.name.split('.').pop() || 'jpg';
+          const path = `providers/${user.id}/portfolio/${Date.now()}_${i}.${ext}`;
+
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('portfolio')
+            .upload(path, file, {
+              cacheControl: '3600',
+              upsert: false,
+            });
+
+          if (uploadData && !uploadError) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('portfolio')
+              .getPublicUrl(path);
+            uploadedUrls.push(publicUrl);
+          }
+        }
+
+        // Save photo URLs to services or a portfolio record
+        if (uploadedUrls.length > 0) {
+          // Create a service entry with portfolio photos
+          await (supabase as any).from('services').insert({
+            provider_id: providerData.id,
+            category_id: categories.find(c => selectedCategories.includes(c.slug))?.id || categories[0]?.id,
+            title: `Servicii ${selectedCategories.map(s => categories.find(c => c.slug === s)?.name).join(', ')}`,
+            price: 0,
+            price_type: 'custom',
+            photos: uploadedUrls,
+            active: true,
+          });
+        }
       }
 
       toast.success('Profil creat cu succes!');
@@ -540,18 +580,21 @@ export default function OnboardingPage() {
 
                 {/* Photo upload placeholder */}
                 <div className="grid grid-cols-3 gap-3">
-                  {portfolioPhotos.map((photo, i) => (
+                  {portfolioPreviews.map((preview, i) => (
                     <div key={i} className="aspect-square rounded-xl bg-slate-100 relative overflow-hidden">
-                      <img src={photo} alt="" className="w-full h-full object-cover" />
+                      <img src={preview} alt="" className="w-full h-full object-cover" />
                       <button
-                        onClick={() => setPortfolioPhotos(prev => prev.filter((_, idx) => idx !== i))}
+                        onClick={() => {
+                          setPortfolioFiles(prev => prev.filter((_, idx) => idx !== i));
+                          setPortfolioPreviews(prev => prev.filter((_, idx) => idx !== i));
+                        }}
                         className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center"
                       >
                         <X className="w-3 h-3" />
                       </button>
                     </div>
                   ))}
-                  {portfolioPhotos.length < 9 && (
+                  {portfolioPreviews.length < 9 && (
                     <label className="aspect-square rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition-colors">
                       <Upload className="w-6 h-6 text-slate-400 mb-1" />
                       <span className="text-xs text-slate-400">Adaugă</span>
@@ -562,10 +605,10 @@ export default function OnboardingPage() {
                         className="hidden"
                         onChange={(e) => {
                           if (e.target.files) {
-                            const newPhotos = Array.from(e.target.files).map((file) =>
-                              URL.createObjectURL(file)
-                            );
-                            setPortfolioPhotos(prev => [...prev, ...newPhotos].slice(0, 9));
+                            const files = Array.from(e.target.files);
+                            const previews = files.map((file) => URL.createObjectURL(file));
+                            setPortfolioFiles(prev => [...prev, ...files].slice(0, 9));
+                            setPortfolioPreviews(prev => [...prev, ...previews].slice(0, 9));
                           }
                         }}
                       />
