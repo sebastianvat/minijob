@@ -42,10 +42,26 @@ export default function LoginPage() {
     window.location.href = '/dashboard';
   };
 
-  // Google OAuth - coming soon
   const handleGoogleLogin = async () => {
-    // TODO: Enable when using server-side rendering
-    alert('Google login coming soon!');
+    setLoading(true);
+    setError(null);
+    const supabase = createClient();
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback/`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
+    });
+
+    if (error) {
+      setError('Eroare la autentificarea cu Google. Încearcă din nou.');
+      setLoading(false);
+    }
   };
 
   return (
