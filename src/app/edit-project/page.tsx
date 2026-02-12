@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, createStorageClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { generateSlug } from '@/lib/utils';
 import { UrgencyLevel, Category } from '@/types/database';
@@ -157,18 +157,21 @@ function EditProjectContent() {
     setSaving(true);
     const supabase = createClient();
 
-    // Upload new photos
+    // Upload new photos (using service role key to bypass RLS)
     let uploadedNewUrls: string[] = [];
-    for (let i = 0; i < newPhotoFiles.length; i++) {
-      const file = newPhotoFiles[i];
-      const ext = file.name.split('.').pop() || 'jpg';
-      const path = `projects/${user.id}/${Date.now()}_${i}.${ext}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('portfolio')
-        .upload(path, file, { cacheControl: '3600', upsert: false });
-      if (uploadData && !uploadError) {
-        const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path);
-        uploadedNewUrls.push(publicUrl);
+    if (newPhotoFiles.length > 0) {
+      const storageClient = createStorageClient();
+      for (let i = 0; i < newPhotoFiles.length; i++) {
+        const file = newPhotoFiles[i];
+        const ext = file.name.split('.').pop() || 'jpg';
+        const path = `projects/${user.id}/${Date.now()}_${i}.${ext}`;
+        const { data: uploadData, error: uploadError } = await storageClient.storage
+          .from('portfolio')
+          .upload(path, file, { cacheControl: '3600', upsert: false });
+        if (uploadData && !uploadError) {
+          const { data: { publicUrl } } = storageClient.storage.from('portfolio').getPublicUrl(path);
+          uploadedNewUrls.push(publicUrl);
+        }
       }
     }
 

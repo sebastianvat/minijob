@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { createClient } from '@/lib/supabase/client';
+import { createClient, createStorageClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { Category, Skill } from '@/types/database';
 
@@ -183,13 +183,14 @@ export default function OnboardingPage() {
       // 4. Upload portfolio photos to Supabase Storage
       if (portfolioFiles.length > 0 && providerData) {
         const uploadedUrls: string[] = [];
+        const storageClient = createStorageClient();
 
         for (let i = 0; i < portfolioFiles.length; i++) {
           const file = portfolioFiles[i];
           const ext = file.name.split('.').pop() || 'jpg';
           const path = `providers/${user.id}/portfolio/${Date.now()}_${i}.${ext}`;
 
-          const { data: uploadData, error: uploadError } = await supabase.storage
+          const { data: uploadData, error: uploadError } = await storageClient.storage
             .from('portfolio')
             .upload(path, file, {
               cacheControl: '3600',
@@ -197,7 +198,7 @@ export default function OnboardingPage() {
             });
 
           if (uploadData && !uploadError) {
-            const { data: { publicUrl } } = supabase.storage
+            const { data: { publicUrl } } = storageClient.storage
               .from('portfolio')
               .getPublicUrl(path);
             uploadedUrls.push(publicUrl);

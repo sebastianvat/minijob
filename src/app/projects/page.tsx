@@ -227,21 +227,26 @@ export default function ProjectsPage() {
                       {project.description}
                     </p>
 
-                    {/* Photos preview */}
-                    {project.photos && project.photos.length > 0 && (
-                      <div className="flex gap-2 mb-4">
-                        {project.photos.slice(0, 3).map((photo, i) => (
-                          <div key={i} className="w-16 h-16 rounded-lg bg-slate-100 overflow-hidden">
-                            <img src={photo} alt="" className="w-full h-full object-cover" />
-                          </div>
-                        ))}
-                        {project.photos.length > 3 && (
-                          <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center text-sm text-slate-500">
-                            +{project.photos.length - 3}
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    {/* Photos preview (filter out old placeholder URLs) */}
+                    {(() => {
+                      const validPhotos = (project.photos || []).filter((url: string) => 
+                        url && !url.includes('picsum.photos') && !url.includes('placeholder') && url.startsWith('http')
+                      );
+                      return validPhotos.length > 0 ? (
+                        <div className="flex gap-2 mb-4">
+                          {validPhotos.slice(0, 3).map((photo: string, i: number) => (
+                            <div key={i} className="w-16 h-16 rounded-lg bg-slate-100 overflow-hidden">
+                              <img src={photo} alt="" className="w-full h-full object-cover" />
+                            </div>
+                          ))}
+                          {validPhotos.length > 3 && (
+                            <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center text-sm text-slate-500">
+                              +{validPhotos.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      ) : null;
+                    })()}
 
                     {/* Meta info */}
                     <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
