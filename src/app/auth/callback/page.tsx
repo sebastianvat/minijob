@@ -49,8 +49,16 @@ export default function AuthCallbackPage() {
           });
         }
 
+        // Check for redirect URL
+        const redirectUrl = urlParams.get('redirect');
+
         // Redirect providers to onboarding, clients to dashboard
-        window.location.href = isProvider ? '/onboarding/' : '/dashboard/';
+        if (isProvider) {
+          const onboardingUrl = redirectUrl ? `/onboarding/?redirect=${encodeURIComponent(redirectUrl)}` : '/onboarding/';
+          window.location.href = onboardingUrl;
+        } else {
+          window.location.href = redirectUrl ? decodeURIComponent(redirectUrl) : '/dashboard/';
+        }
       } else {
         // No session found, might need to wait for hash processing
         // Try listening for auth state change

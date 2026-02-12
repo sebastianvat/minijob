@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Zap, ArrowRight, ArrowLeft, CheckCircle2, User, MapPin, Phone,
   Briefcase, Home, Hammer, Car, Laptop, PawPrint, Baby, Sparkles,
-  Camera, Upload, X, Award, ChevronRight
+  Camera, Upload, X, Award, ChevronRight, Send
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -40,6 +40,7 @@ export default function OnboardingPage() {
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState(1);
   const [done, setDone] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
 
   // Step 1: Personal info
   const [fullName, setFullName] = useState('');
@@ -72,6 +73,13 @@ export default function OnboardingPage() {
         return;
       }
       setUser(user);
+      
+      // Check for redirect parameter
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get('redirect');
+        if (redirect) setRedirectUrl(decodeURIComponent(redirect));
+      }
 
       // Pre-fill from user metadata
       const meta = user.user_metadata;
@@ -250,9 +258,15 @@ export default function OnboardingPage() {
           <p className="text-slate-600 mb-2">
             Profilul tău de specialist a fost creat cu succes.
           </p>
-          <p className="text-slate-500 text-sm mb-8">
-            Acum poți vedea proiectele din zona ta și să faci oferte clienților.
-          </p>
+          {redirectUrl ? (
+            <p className="text-slate-500 text-sm mb-8">
+              Acum poți trimite oferta ta. Te redirecționăm înapoi la proiect...
+            </p>
+          ) : (
+            <p className="text-slate-500 text-sm mb-8">
+              Acum poți vedea proiectele din zona ta și să faci oferte clienților.
+            </p>
+          )}
 
           <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 mb-8">
             <p className="text-sm text-teal-700">
@@ -262,12 +276,21 @@ export default function OnboardingPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <Button className="bg-orange-500 hover:bg-orange-600 h-12" asChild>
-              <Link href="/projects">
-                <Briefcase className="w-4 h-4 mr-2" />
-                Vezi proiecte disponibile
-              </Link>
-            </Button>
+            {redirectUrl ? (
+              <Button className="bg-orange-500 hover:bg-orange-600 h-12" asChild>
+                <Link href={redirectUrl}>
+                  <Send className="w-4 h-4 mr-2" />
+                  Trimite oferta acum
+                </Link>
+              </Button>
+            ) : (
+              <Button className="bg-orange-500 hover:bg-orange-600 h-12" asChild>
+                <Link href="/projects">
+                  <Briefcase className="w-4 h-4 mr-2" />
+                  Vezi proiecte disponibile
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" className="h-12" asChild>
               <Link href="/dashboard">
                 Mergi la dashboard

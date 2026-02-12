@@ -16,6 +16,7 @@ function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const typeParam = searchParams?.get('type');
+  const redirectParam = searchParams?.get('redirect');
   const [userType, setUserType] = useState<'client' | 'provider'>(typeParam === 'provider' ? 'provider' : 'client');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -70,7 +71,13 @@ function RegisterContent() {
 
     // If user is created and session exists, redirect based on type
     if (data?.session) {
-      window.location.href = userType === 'provider' ? '/onboarding' : '/dashboard';
+      if (userType === 'provider') {
+        // Provider goes to onboarding, then back to redirect URL if set
+        const onboardingUrl = redirectParam ? `/onboarding?redirect=${encodeURIComponent(redirectParam)}` : '/onboarding';
+        window.location.href = onboardingUrl;
+      } else {
+        window.location.href = redirectParam ? decodeURIComponent(redirectParam) : '/dashboard';
+      }
       return;
     }
 
@@ -84,10 +91,14 @@ function RegisterContent() {
     setError(null);
     const supabase = createClient();
     
+    const callbackUrl = redirectParam
+      ? `${window.location.origin}/auth/callback/?role=${userType}&redirect=${encodeURIComponent(redirectParam)}`
+      : `${window.location.origin}/auth/callback/?role=${userType}`;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback/?role=${userType}`,
+        redirectTo: callbackUrl,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',

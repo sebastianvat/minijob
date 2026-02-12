@@ -18,6 +18,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Get redirect URL from query params
+  const getRedirectUrl = (): string => {
+    if (typeof window === 'undefined') return '/dashboard';
+    const params = new URLSearchParams(window.location.search);
+    return params.get('redirect') ? decodeURIComponent(params.get('redirect')!) : '/dashboard';
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -38,8 +45,8 @@ export default function LoginPage() {
       return;
     }
 
-    // Use window.location for static export compatibility
-    window.location.href = '/dashboard';
+    // Redirect to original page or dashboard
+    window.location.href = getRedirectUrl();
   };
 
   const handleGoogleLogin = async () => {
@@ -47,10 +54,15 @@ export default function LoginPage() {
     setError(null);
     const supabase = createClient();
     
+    const redirectTarget = getRedirectUrl();
+    const callbackUrl = redirectTarget !== '/dashboard'
+      ? `${window.location.origin}/auth/callback/?redirect=${encodeURIComponent(redirectTarget)}`
+      : `${window.location.origin}/auth/callback/`;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback/`,
+        redirectTo: callbackUrl,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',

@@ -180,14 +180,60 @@ export function ProjectDetail({ projectId, projectSlug }: ProjectDetailProps = {
     }
   }, [id]);
 
+  // Save offer form data to sessionStorage for redirect flows
+  const saveOfferDraft = () => {
+    if (typeof window !== 'undefined' && project) {
+      sessionStorage.setItem('offerDraft', JSON.stringify({
+        projectId: project.id,
+        price: offerPrice,
+        message: offerMessage,
+        duration: offerDuration,
+        availableFrom: offerAvailableFrom,
+        includesMaterials,
+      }));
+    }
+  };
+
+  // Restore offer draft from sessionStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && project) {
+      const draft = sessionStorage.getItem('offerDraft');
+      if (draft) {
+        try {
+          const data = JSON.parse(draft);
+          if (data.projectId === project.id) {
+            setOfferPrice(data.price || '');
+            setOfferMessage(data.message || '');
+            setOfferDuration(data.duration || '');
+            setOfferAvailableFrom(data.availableFrom || '');
+            setIncludesMaterials(data.includesMaterials || false);
+            sessionStorage.removeItem('offerDraft');
+          }
+        } catch {}
+      }
+    }
+  }, [project]);
+
   const handleSubmitOffer = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!user || !isProvider) {
-      toast.error('Trebuie să fii înregistrat ca specialist pentru a face oferte.');
+
+    // 1. Not logged in -> redirect to register as provider
+    if (!user) {
+      saveOfferDraft();
+      const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = `/auth/register?type=provider&redirect=${returnUrl}`;
       return;
     }
 
+    // 2. Logged in but not a provider -> redirect to onboarding
+    if (!isProvider) {
+      saveOfferDraft();
+      const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = `/onboarding?redirect=${returnUrl}`;
+      return;
+    }
+
+    // 3. Validate form
     if (!offerPrice || !offerMessage) {
       toast.error('Te rugăm să completezi prețul și mesajul.');
       return;
@@ -226,6 +272,11 @@ export function ProjectDetail({ projectId, projectSlug }: ProjectDetailProps = {
     } else {
       toast.success('Oferta a fost trimisă cu succes!');
       setHasOffered(true);
+      
+      // Update project offers count locally
+      if (project) {
+        setProject({ ...project, offers_count: project.offers_count + 1 });
+      }
     }
 
     setSubmitting(false);
@@ -599,8 +650,8 @@ export function ProjectDetail({ projectId, projectSlug }: ProjectDetailProps = {
               </CardContent>
             </Card>
 
-            {/* Sealed bid info for providers */}
-            {user && isProvider && !isOwner && project.status === 'open' && (
+            {/* Sealed bid info */}
+            {!isOwner && project.status === 'open' && (
               <Card className="border-slate-200">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
@@ -609,29 +660,46 @@ export function ProjectDetail({ projectId, projectSlug }: ProjectDetailProps = {
                     </div>
                     <div>
                       <p className="font-semibold text-slate-900">{project.offers_count} oferte depuse</p>
-                      <p className="text-xs text-slate-500">Ofertele sunt sigilate - doar clientul le vede</p>
+                      <p className="text-xs text-slate-500">Ofertele sunt sigilate — doar clientul le vede</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* Make Offer Form (only for providers) */}
-            {user && isProvider && !isOwner && !hasOffered && project.status === 'open' && (
+            {/* Already offered message */}
+            {hasOffered && (
+              <Card className="border-green-200 bg-green-50">
+                <CardContent className="p-6 text-center">
+                  <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
+                  <h3 className="font-semibold text-green-800 mb-1">Ofertă trimisă!</h3>
+                  <p className="text-sm text-green-600">
+                    Clientul va fi notificat și te va contacta dacă acceptă.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ═══ OFFER FORM — visible to EVERYONE (except owner & already offered) ═══ */}
+            {!isOwner && !hasOffered && project.status === 'open' && (
               <Card className="border-teal-200 bg-teal-50/50">
-                <CardHeader>
+                <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Send className="w-5 h-5 text-teal-600" />
                     Fă o ofertă
                   </CardTitle>
                   <CardDescription>
-                    Trimite o ofertă către client
+                    {!user 
+                      ? 'Completează oferta — la trimitere vei fi redirecționat să te înscrii'
+                      : !isProvider
+                      ? 'Completează oferta — la trimitere vei finaliza profilul de specialist'
+                      : 'Trimite o ofertă sigilată către client'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmitOffer} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="price">Preț (RON) *</Label>
+                      <Label htmlFor="price">Prețul tău (RON) *</Label>
                       <Input
                         id="price"
                         type="number"
@@ -643,7 +711,7 @@ export function ProjectDetail({ projectId, projectSlug }: ProjectDetailProps = {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="message">Mesaj *</Label>
+                      <Label htmlFor="message">Mesaj către client *</Label>
                       <Textarea
                         id="message"
                         placeholder="Descrie experiența ta și de ce ești potrivit pentru acest proiect..."
@@ -688,45 +756,18 @@ export function ProjectDetail({ projectId, projectSlug }: ProjectDetailProps = {
 
                     <Button 
                       type="submit" 
-                      className="w-full bg-orange-500 hover:bg-orange-600"
+                      className="w-full bg-orange-500 hover:bg-orange-600 h-12 text-base font-semibold"
                       disabled={submitting}
                     >
-                      {submitting ? 'Se trimite...' : 'Trimite oferta'}
+                      {submitting ? 'Se trimite...' : !user ? '🔒 Înscrie-te și trimite oferta' : !isProvider ? '📋 Completează profilul și trimite' : '📨 Trimite oferta'}
                     </Button>
+
+                    {!user && (
+                      <p className="text-xs text-center text-slate-500">
+                        Nu ai cont? La click vei fi ghidat să te înscrii rapid, apoi oferta se trimite automat.
+                      </p>
+                    )}
                   </form>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Already offered message */}
-            {hasOffered && (
-              <Card className="border-green-200 bg-green-50">
-                <CardContent className="p-6 text-center">
-                  <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                  <h3 className="font-semibold text-green-800 mb-1">Ofertă trimisă!</h3>
-                  <p className="text-sm text-green-600">
-                    Clientul va fi notificat și te va contacta dacă acceptă.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Not logged in message */}
-            {!user && (
-              <Card className="border-slate-200">
-                <CardContent className="p-6 text-center">
-                  <h3 className="font-semibold text-slate-900 mb-2">Vrei să faci o ofertă?</h3>
-                  <p className="text-sm text-slate-500 mb-4">
-                    Trebuie să fii autentificat ca specialist pentru a face oferte.
-                  </p>
-                  <div className="flex gap-2 justify-center">
-                    <Button variant="outline" asChild>
-                      <Link href="/auth/login">Autentificare</Link>
-                    </Button>
-                    <Button className="bg-orange-500 hover:bg-orange-600" asChild>
-                      <Link href="/auth/register">Înscrie-te</Link>
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
             )}
