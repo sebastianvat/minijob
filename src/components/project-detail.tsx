@@ -7,7 +7,7 @@ import {
   Zap, MapPin, Calendar, Clock, ArrowLeft,
   Home, Hammer, Car, Laptop, PawPrint, Baby, Star,
   CheckCircle2, Send, User, MessageCircle, Briefcase,
-  Image as ImageIcon
+  Image as ImageIcon, ZoomIn
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -17,6 +17,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import Lightbox from 'yet-another-react-lightbox';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
+import 'yet-another-react-lightbox/styles.css';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { 
@@ -72,6 +75,10 @@ export function ProjectDetail({ projectId, projectSlug }: ProjectDetailProps = {
   const [isProvider, setIsProvider] = useState(false);
   const [hasOffered, setHasOffered] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // Offer form state
   const [offerPrice, setOfferPrice] = useState('');
@@ -381,21 +388,39 @@ export function ProjectDetail({ projectId, projectSlug }: ProjectDetailProps = {
                 <h3 className="font-semibold text-slate-900 mb-3">Descriere</h3>
                 <p className="text-slate-600 whitespace-pre-wrap">{project.description}</p>
 
-                {/* Photos */}
+                {/* Photos with Lightbox */}
                 {project.photos && project.photos.length > 0 && (
                   <>
                     <Separator className="my-6" />
                     <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
                       <ImageIcon className="w-5 h-5" />
                       Fotografii ({project.photos.length})
+                      <span className="text-xs text-slate-400 font-normal ml-1">Click pentru zoom</span>
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {project.photos.map((photo, i) => (
-                        <div key={i} className="aspect-video rounded-lg overflow-hidden bg-slate-100">
-                          <img src={photo} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
-                        </div>
+                        <button
+                          key={i}
+                          onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
+                          className="group relative aspect-video rounded-lg overflow-hidden bg-slate-100 cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                        >
+                          <img src={photo} alt={`Foto ${i + 1}`} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                            <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                          </div>
+                        </button>
                       ))}
                     </div>
+                    <Lightbox
+                      open={lightboxOpen}
+                      close={() => setLightboxOpen(false)}
+                      index={lightboxIndex}
+                      slides={project.photos.map((photo) => ({ src: photo }))}
+                      plugins={[Zoom]}
+                      zoom={{ maxZoomPixelRatio: 5 }}
+                      carousel={{ finite: project.photos.length <= 1 }}
+                      styles={{ container: { backgroundColor: 'rgba(0, 0, 0, 0.9)' } }}
+                    />
                   </>
                 )}
               </CardContent>
