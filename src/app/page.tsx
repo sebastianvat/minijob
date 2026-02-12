@@ -1,225 +1,194 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from "next/link";
 import { 
-  Clock, Shield, Star, ArrowRight, CheckCircle2, Users, Zap, Heart, MapPin,
-  Phone, Calendar, CreditCard, Home as HomeIcon, Hammer, Car, Laptop, PawPrint, Baby, FileText
+  ArrowRight, CheckCircle2, Users, Zap, Heart, MapPin, Search,
+  Star, Home as HomeIcon, Hammer, Car, Laptop, PawPrint, Baby, 
+  FileText, Shield, Briefcase, TrendingUp, Clock, ChevronRight,
+  Sparkles, Award, Eye, MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/header";
+import { createClient } from '@/lib/supabase/client';
 
-// New Skill Zones
+// Skill Zones config
 const skillZones = [
-  { 
-    name: "Casă", 
-    icon: HomeIcon, 
-    color: "bg-slate-700", 
-    skills: "Curățenie, gătit, organizare",
-    providers: 234,
-    slug: "casa" 
-  },
-  { 
-    name: "Construcții", 
-    icon: Hammer, 
-    color: "bg-slate-700", 
-    skills: "Zugrăvit, parchet, renovări",
-    providers: 156,
-    slug: "constructii" 
-  },
-  { 
-    name: "Auto", 
-    icon: Car, 
-    color: "bg-slate-700", 
-    skills: "Detailing, polish, transport",
-    providers: 89,
-    slug: "auto" 
-  },
-  { 
-    name: "Tech Jobs", 
-    icon: Laptop, 
-    color: "bg-slate-700", 
-    skills: "Social media, data entry",
-    providers: 67,
-    slug: "tech" 
-  },
-  { 
-    name: "Pet Care", 
-    icon: PawPrint, 
-    color: "bg-slate-700", 
-    skills: "Plimbat câini, pet sitting",
-    providers: 45,
-    slug: "pets" 
-  },
-  { 
-    name: "Kids & Learning", 
-    icon: Baby, 
-    color: "bg-slate-700", 
-    skills: "Bonă, meditații, skill-uri",
-    providers: 78,
-    slug: "kids" 
-  },
+  { name: "Casă", icon: HomeIcon, gradient: "from-teal-500 to-teal-600", skills: "Curățenie, gătit, organizare", slug: "casa", emoji: "🏠" },
+  { name: "Construcții", icon: Hammer, gradient: "from-amber-500 to-amber-600", skills: "Zugrăvit, parchet, renovări", slug: "constructii", emoji: "🔨" },
+  { name: "Auto", icon: Car, gradient: "from-blue-500 to-blue-600", skills: "Detailing, polish, transport", slug: "auto", emoji: "🚗" },
+  { name: "Tech Jobs", icon: Laptop, gradient: "from-purple-500 to-purple-600", skills: "Social media, data entry", slug: "tech", emoji: "💻" },
+  { name: "Pet Care", icon: PawPrint, gradient: "from-green-500 to-green-600", skills: "Plimbat câini, pet sitting", slug: "pets", emoji: "🐾" },
+  { name: "Kids & Learning", icon: Baby, gradient: "from-pink-500 to-pink-600", skills: "Bonă, meditații, skill-uri", slug: "kids", emoji: "👶" },
 ];
 
-const steps = [
-  { 
-    step: "1", 
-    title: "Postezi proiectul", 
-    desc: "Descrii ce ai nevoie, adaugi poze și buget",
-    icon: FileText
-  },
-  { 
-    step: "2", 
-    title: "Primești oferte", 
-    desc: "Specialiștii fac oferte cu preț și disponibilitate",
-    icon: Users
-  },
-  { 
-    step: "3", 
-    title: "Alegi tu", 
-    desc: "Compari rating, portofoliu și preț, apoi alegi",
-    icon: CheckCircle2
-  },
+// Popular searches
+const popularSearches = [
+  "Curățenie apartament", "Zugrăvit", "Detailing auto", 
+  "Montaj mobilă", "Bonă", "Instalații sanitare"
 ];
 
-const benefits = [
-  { icon: Shield, title: "Trust Score", description: "Rating per skill, nu rating general", color: "bg-teal-100 text-teal-600" },
-  { icon: Star, title: "Portofoliu", description: "Poze reale din lucrări anterioare", color: "bg-teal-100 text-teal-600" },
-  { icon: Users, title: "Compari oferte", description: "Nu accepți prima, alegi tu cel mai bun", color: "bg-teal-100 text-teal-600" },
-  { icon: Heart, title: "Garanție", description: "Satisfacție sau banii înapoi", color: "bg-teal-100 text-teal-600" },
-];
-
-const testimonials = [
-  {
-    name: "Maria P.",
-    role: "Client din Sibiu",
-    text: "Am postat că am nevoie de zugrăvit și în 2 ore aveam 5 oferte. Am ales pe cel cu cel mai bun portofoliu!",
-    rating: 5
-  },
-  {
-    name: "Ion M.",
-    role: "Prestator zugrăvit",
-    text: "Îmi place că pot face oferte la proiecte. Am un rating de 4.9 pe zugrăvit și clienții mă aleg pentru asta.",
-    rating: 5
-  },
-  {
-    name: "Elena D.",
-    role: "Client din Sibiu",
-    text: "Am comparat 3 oferte pentru detailing auto. Am ales-o pe cea cu poze din lucrări similare. Perfect!",
-    rating: 5
-  },
-];
-
-// Recent projects preview
-const recentProjects = [
-  {
-    title: "Zugrăvit 3 camere apartament",
-    category: "Construcții",
-    budget: "1500-2500",
-    offers: 5,
-    city: "Sibiu"
-  },
-  {
-    title: "Detailing complet BMW X5",
-    category: "Auto",
-    budget: "300-500",
-    offers: 3,
-    city: "Cluj"
-  },
-  {
-    title: "Curățenie după renovare",
-    category: "Casă",
-    budget: "400-600",
-    offers: 8,
-    city: "Sibiu"
-  },
-];
+interface ProjectPreview {
+  id: string;
+  title: string;
+  location_city: string;
+  budget_min: number | null;
+  budget_max: number | null;
+  offers_count: number;
+  created_at: string;
+  category: { name: string; slug: string } | null;
+}
 
 export default function Home() {
+  const [projects, setProjects] = useState<ProjectPreview[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const loadProjects = async () => {
+      const supabase = createClient();
+      const { data } = await (supabase as any)
+        .from('projects')
+        .select('id, title, location_city, budget_min, budget_max, offers_count, created_at, category:categories(name, slug)')
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(6);
+      
+      if (data) setProjects(data);
+    };
+    loadProjects();
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = `/categories?q=${encodeURIComponent(searchQuery)}`;
+    }
+  };
+
+  const timeAgo = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    if (hours < 1) return 'Acum câteva minute';
+    if (hours < 24) return `Acum ${hours}h`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return 'Ieri';
+    return `Acum ${days} zile`;
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <Header />
 
-      {/* Hero - New "Rent a Skill" */}
-      <section className="pt-8 pb-20 px-4 bg-gradient-to-b from-slate-50 to-white">
-        <div className="container mx-auto">
-          <div className="max-w-4xl mx-auto text-center">
-            <Badge className="bg-teal-50 text-teal-600 border-teal-200 mb-6 px-4 py-2">
-              <MapPin className="w-4 h-4 mr-2" />
-              Acum disponibil în Sibiu, Cluj, București
-            </Badge>
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* HERO - "Ce trebuie să faci?" - direct, fara jargon        */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden">
+        {/* Subtle gradient bg */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-orange-50/30" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-teal-100/40 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+        
+        <div className="relative container mx-auto px-4 pt-12 pb-16 md:pt-16 md:pb-24">
+          <div className="max-w-3xl mx-auto text-center">
+            {/* Location pill */}
+            <div className="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-2 text-sm text-slate-600 mb-8 shadow-sm">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <MapPin className="w-3.5 h-3.5" />
+              Disponibil în Sibiu, Cluj, București
+            </div>
             
-            <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-4 leading-tight">
-              Rent a Skill
+            {/* Main headline */}
+            <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-4 leading-tight tracking-tight">
+              Găsește pe cineva<br />
+              <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
+                care știe ce face
+              </span>
             </h1>
             
-            <p className="text-2xl text-slate-600 mb-8 leading-relaxed">
-              Închiriază skill-ul cuiva pentru câteva ore.
+            <p className="text-lg md:text-xl text-slate-500 mb-10 max-w-xl mx-auto">
+              Meșteri, specialiști și freelanceri verificați. Postezi ce ai nevoie, primești oferte, alegi tu.
             </p>
-            
-            {/* Dual CTA */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white text-lg h-14 px-8 shadow-xl shadow-orange-500/25" asChild>
-                <Link href="/post-project">
-                  <FileText className="mr-2 w-5 h-5" />
-                  Postează un proiect
+
+            {/* Search bar */}
+            <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-6">
+              <div className="flex items-center bg-white border-2 border-slate-200 rounded-2xl p-2 shadow-xl shadow-slate-200/50 focus-within:border-orange-400 focus-within:shadow-orange-100/50 transition-all">
+                <Search className="w-5 h-5 text-slate-400 ml-4" />
+                <input
+                  type="text"
+                  placeholder="Ce serviciu cauți? (ex: zugrăvit, curățenie, detailing...)"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 px-4 py-3 bg-transparent text-slate-900 placeholder:text-slate-400 outline-none text-base"
+                />
+                <Button type="submit" className="bg-orange-500 hover:bg-orange-600 h-12 px-6 rounded-xl text-base">
+                  Caută
+                </Button>
+              </div>
+            </form>
+
+            {/* Popular searches */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+              <span className="text-xs text-slate-400">Populare:</span>
+              {popularSearches.map((term) => (
+                <Link 
+                  key={term} 
+                  href={`/categories?q=${encodeURIComponent(term)}`}
+                  className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-full transition-colors"
+                >
+                  {term}
                 </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-slate-300 text-slate-700 hover:bg-slate-50 text-lg h-14 px-8" asChild>
-                <Link href="/categories">
-                  Caută un skill
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
-              </Button>
+              ))}
             </div>
 
-            {/* Trust badges */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-500">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-teal-500" />
-                <span>500+ specialiști verificați</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-teal-500" />
-                <span>Rating per skill</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-teal-500" />
-                <span>Portofoliu cu dovezi</span>
-              </div>
+            {/* Dual CTA - Split */}
+            <div className="grid sm:grid-cols-2 gap-4 max-w-xl mx-auto">
+              <Link href="/post-project">
+                <div className="group bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl p-5 text-white text-left hover:shadow-xl hover:shadow-orange-200/50 transition-all hover:-translate-y-0.5">
+                  <FileText className="w-8 h-8 mb-3 opacity-80" />
+                  <h3 className="font-bold text-lg mb-1">Postează un proiect</h3>
+                  <p className="text-orange-100 text-sm">Descrie ce ai nevoie și primești oferte de la specialiști</p>
+                  <ArrowRight className="w-5 h-5 mt-3 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+              <Link href="/categories">
+                <div className="group bg-white border-2 border-slate-200 rounded-2xl p-5 text-left hover:border-teal-300 hover:shadow-xl hover:shadow-teal-100/50 transition-all hover:-translate-y-0.5">
+                  <Eye className="w-8 h-8 mb-3 text-teal-600" />
+                  <h3 className="font-bold text-lg text-slate-900 mb-1">Caută un specialist</h3>
+                  <p className="text-slate-500 text-sm">Browse prin categorii și alege direct pe cineva</p>
+                  <ArrowRight className="w-5 h-5 mt-3 text-slate-400 group-hover:translate-x-1 group-hover:text-teal-600 transition-all" />
+                </div>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Skill Zones */}
-      <section id="servicii" className="py-20 px-4">
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* SKILL ZONES - Categories grid                              */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <section className="py-16 md:py-20 px-4 bg-slate-50/50">
         <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <Badge className="bg-slate-100 text-slate-600 border-slate-200 mb-4">
-              Skill Zones
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              Ce skill cauți?
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
+              Ce trebuie să faci?
             </h2>
-            <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-              Alege zona și găsește specialiști cu skill-uri verificate
+            <p className="text-slate-500">
+              Alege o categorie și găsește specialistul potrivit
             </p>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 max-w-5xl mx-auto">
             {skillZones.map((zone) => (
               <Link key={zone.slug} href={`/categories/${zone.slug}`}>
-                <Card className="group bg-white border-slate-200 hover:border-teal-300 hover:shadow-lg transition-all cursor-pointer h-full text-center">
-                  <CardContent className="p-4">
-                    <div className={`w-14 h-14 ${zone.color} rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform`}>
+                <Card className="group bg-white border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all cursor-pointer h-full">
+                  <CardContent className="p-5 text-center">
+                    <div className={`w-14 h-14 bg-gradient-to-br ${zone.gradient} rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
                       <zone.icon className="w-7 h-7 text-white" />
                     </div>
-                    <h3 className="text-sm font-semibold text-slate-900 mb-1">{zone.name}</h3>
-                    <p className="text-xs text-slate-500 mb-2">{zone.skills}</p>
-                    <Badge variant="outline" className="text-xs border-teal-200 text-teal-600">
-                      {zone.providers} pro
-                    </Badge>
+                    <h3 className="font-semibold text-slate-900 text-sm mb-1">{zone.name}</h3>
+                    <p className="text-xs text-slate-400 leading-snug">{zone.skills}</p>
                   </CardContent>
                 </Card>
               </Link>
@@ -228,151 +197,224 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Recent Projects */}
-      <section className="py-20 px-4 bg-slate-50">
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* CUM FUNCTIONEAZA - 3 pasi vizuali                          */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <section className="py-16 md:py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <Badge className="bg-orange-100 text-orange-600 border-orange-200 mb-4">
-              Proiecte active
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              Proiecte care așteaptă oferte
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
+              Simplu ca 1-2-3
             </h2>
-            <p className="text-slate-600 text-lg">
-              Clienții postează, specialiștii fac oferte
-            </p>
+            <p className="text-slate-500">Tu descrii, ei oferă, tu alegi</p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-10">
-            {recentProjects.map((project, i) => (
-              <Card key={i} className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
-                <CardContent className="p-5">
-                  <Badge variant="outline" className="mb-3 text-xs border-slate-200">
-                    {project.category}
-                  </Badge>
-                  <h3 className="font-semibold text-slate-900 mb-2">{project.title}</h3>
-                  <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {project.city}
-                    </span>
-                    <span className="font-medium text-slate-900">{project.budget} lei</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Badge className="bg-teal-50 text-teal-600 border-teal-200">
-                      {project.offers} oferte
-                    </Badge>
-                    <Button variant="ghost" size="sm" className="text-orange-500 hover:text-orange-600 hover:bg-orange-50">
-                      Vezi detalii →
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Button className="bg-orange-500 hover:bg-orange-600" asChild>
-              <Link href="/post-project">
-                <FileText className="mr-2 w-4 h-4" />
-                Postează și tu un proiect
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section id="cum-functioneaza" className="py-20 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <Badge className="bg-slate-100 text-slate-600 border-slate-200 mb-4">
-              Cum funcționează
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              Postezi → Primești oferte → Alegi
-            </h2>
-            <p className="text-slate-600 text-lg">
-              Nu accepți primul preț. Tu alegi de la cine cumperi.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {steps.map((item, index) => (
-              <div key={item.step} className="relative">
-                {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-12 left-1/2 w-full h-0.5 bg-slate-200"></div>
-                )}
-                <div className="relative bg-white rounded-2xl p-8 text-center shadow-sm border border-slate-100">
-                  <div className="w-16 h-16 rounded-full bg-slate-900 flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-white">
-                    {item.step}
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center mx-auto mb-4">
-                    <item.icon className="w-6 h-6 text-teal-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-slate-900 mb-2">{item.title}</h3>
-                  <p className="text-slate-500">{item.desc}</p>
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {/* Step 1 */}
+            <div className="relative">
+              <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center h-full hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 bg-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white text-xl font-bold">
+                  1
                 </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">Descrii ce ai nevoie</h3>
+                <p className="text-slate-500 text-sm">
+                  Alegi categoria, scrii detalii, adaugi poze și buget. Durează 2 minute.
+                </p>
               </div>
-            ))}
+              <div className="hidden md:block absolute top-1/2 -right-3 text-slate-300">
+                <ChevronRight className="w-6 h-6" />
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative">
+              <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center h-full hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 bg-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white text-xl font-bold">
+                  2
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">Primești oferte</h3>
+                <p className="text-slate-500 text-sm">
+                  Specialiștii îți trimit oferte cu preț, disponibilitate și portofoliu.
+                </p>
+              </div>
+              <div className="hidden md:block absolute top-1/2 -right-3 text-slate-300">
+                <ChevronRight className="w-6 h-6" />
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div>
+              <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center h-full hover:shadow-lg transition-shadow">
+                <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white text-xl font-bold">
+                  3
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">Alegi și gata</h3>
+                <p className="text-slate-500 text-sm">
+                  Compari rating, portofoliu și preț. Tu decizi de la cine cumperi.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Benefits - Trust focused */}
-      <section className="py-20 px-4 bg-teal-50/50">
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* PROIECTE RECENTE - live din Supabase                       */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {projects.length > 0 && (
+        <section className="py-16 md:py-20 px-4 bg-slate-50/50">
+          <div className="container mx-auto">
+            <div className="flex items-center justify-between mb-8 max-w-5xl mx-auto">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-1">
+                  Proiecte recente
+                </h2>
+                <p className="text-slate-500 text-sm">Proiecte postate de clienți care așteaptă oferte</p>
+              </div>
+              <Button variant="outline" className="hidden sm:flex" asChild>
+                <Link href="/projects">
+                  Vezi toate
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
+            </div>
+            
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+              {projects.map((project) => (
+                <Link key={project.id} href={`/project?id=${project.id}`}>
+                  <Card className="bg-white border-slate-200 hover:border-orange-200 hover:shadow-lg transition-all cursor-pointer h-full">
+                    <CardContent className="p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <Badge variant="outline" className="text-xs border-slate-200">
+                          {project.category?.name || 'Altceva'}
+                        </Badge>
+                        <span className="text-xs text-slate-400">{timeAgo(project.created_at)}</span>
+                      </div>
+                      <h3 className="font-semibold text-slate-900 mb-3 line-clamp-2">{project.title}</h3>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1 text-sm text-slate-500">
+                          <MapPin className="w-3.5 h-3.5" />
+                          {project.location_city}
+                        </div>
+                        <span className="font-semibold text-slate-900 text-sm">
+                          {project.budget_min && project.budget_max 
+                            ? `${project.budget_min}-${project.budget_max} lei`
+                            : 'Cere ofertă'
+                          }
+                        </span>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <Badge className="bg-teal-50 text-teal-600 border-teal-200 text-xs">
+                          <MessageCircle className="w-3 h-3 mr-1" />
+                          {project.offers_count} oferte
+                        </Badge>
+                        <span className="text-xs text-orange-500 font-medium">
+                          Vezi detalii →
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+
+            <div className="text-center mt-8">
+              <Button className="bg-orange-500 hover:bg-orange-600" asChild>
+                <Link href="/post-project">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Postează și tu un proiect
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* DE CE MINIJOB - Trust elements                             */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <section className="py-16 md:py-20 px-4">
         <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <Badge className="bg-teal-100 text-teal-600 border-teal-200 mb-4">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
               De ce MiniJob?
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-              Trust prin transparență
             </h2>
+            <p className="text-slate-500">Transparență și încredere la fiecare pas</p>
           </div>
-          <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            {benefits.map((benefit) => (
-              <div key={benefit.title} className="text-center p-6 bg-white rounded-xl border border-slate-100">
-                <div className={`w-14 h-14 rounded-2xl ${benefit.color} flex items-center justify-center mx-auto mb-4`}>
-                  <benefit.icon className="w-7 h-7" />
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
+            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="w-12 h-12 bg-teal-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Award className="w-6 h-6 text-teal-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-1">{benefit.title}</h3>
-                <p className="text-slate-500 text-sm">{benefit.description}</p>
-              </div>
-            ))}
+                <h3 className="font-bold text-slate-900 mb-1">Rating per skill</h3>
+                <p className="text-sm text-slate-500">Nu rating general. Fiecare skill are propriul rating și review-uri.</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Eye className="w-6 h-6 text-orange-600" />
+                </div>
+                <h3 className="font-bold text-slate-900 mb-1">Portofoliu real</h3>
+                <p className="text-sm text-slate-500">Poze din lucrări anterioare. Vezi ce a făcut, nu doar ce promite.</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Users className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="font-bold text-slate-900 mb-1">Tu alegi</h3>
+                <p className="text-sm text-slate-500">Primești mai multe oferte. Compari preț, calitate și alegi tu.</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mb-4">
+                  <Shield className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="font-bold text-slate-900 mb-1">Verificați</h3>
+                <p className="text-sm text-slate-500">Specialiști verificați cu identitate confirmată și istoric vizibil.</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section id="testimoniale" className="py-20 px-4">
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* TESTIMONIALE                                               */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <section className="py-16 md:py-20 px-4 bg-slate-50/50">
         <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <Badge className="bg-slate-100 text-slate-600 border-slate-200 mb-4">
-              Testimoniale
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
               Ce spun utilizatorii
             </h2>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {testimonials.map((t, i) => (
+          <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+            {[
+              { name: "Maria P.", role: "Client din Sibiu", text: "Am postat că am nevoie de zugrăvit și în 2 ore aveam 5 oferte. Am ales pe cel cu cel mai bun portofoliu!" },
+              { name: "Ion M.", role: "Specialist zugrăvit", text: "Îmi place că pot face oferte la proiecte. Am un rating de 4.9 pe zugrăvit și clienții mă aleg pentru asta." },
+              { name: "Elena D.", role: "Client din Cluj", text: "Am comparat 3 oferte pentru detailing auto. Am ales-o pe cea cu poze din lucrări similare. Perfect!" },
+            ].map((t, i) => (
               <Card key={i} className="bg-white border-slate-200">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-1 mb-4">
-                    {[...Array(t.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                    {[...Array(5)].map((_, j) => (
+                      <Star key={j} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                     ))}
                   </div>
-                  <p className="text-slate-600 mb-4 italic">&ldquo;{t.text}&rdquo;</p>
+                  <p className="text-slate-600 text-sm mb-5 leading-relaxed">&ldquo;{t.text}&rdquo;</p>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
-                      <span className="text-teal-600 font-semibold">{t.name[0]}</span>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">{t.name[0]}</span>
                     </div>
                     <div>
-                      <p className="font-semibold text-slate-900">{t.name}</p>
-                      <p className="text-sm text-slate-500">{t.role}</p>
+                      <p className="font-semibold text-slate-900 text-sm">{t.name}</p>
+                      <p className="text-xs text-slate-500">{t.role}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -382,72 +424,85 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Provider */}
-      <section className="py-20 px-4">
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* CTA MESERIAS - "Esti specialist? Inscrie-te"               */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      <section className="py-16 md:py-20 px-4">
         <div className="container mx-auto">
-          <Card className="bg-slate-900 border-0 max-w-4xl mx-auto overflow-hidden">
-            <CardContent className="p-10 md:p-16">
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div>
-                  <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 mb-4">
+          <Card className="bg-slate-900 border-0 max-w-5xl mx-auto overflow-hidden">
+            <CardContent className="p-0">
+              <div className="grid md:grid-cols-2">
+                {/* Left - Text */}
+                <div className="p-8 md:p-12">
+                  <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 mb-5">
                     Pentru specialiști
                   </Badge>
-                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                    Ai un skill? Monetizează-l!
+                  <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
+                    Ai un skill?<br />Câștigă bani cu el.
                   </h2>
-                  <p className="text-xl text-slate-400 mb-6">
-                    Înscrie-te, adaugă skill-urile tale cu portofoliu, și primește cereri de ofertă.
+                  <p className="text-slate-400 mb-6">
+                    Înscrie-te gratuit, adaugă skill-urile tale și primește cereri de la clienți din zona ta.
                   </p>
+                  
                   <div className="space-y-3 mb-8">
-                    <div className="flex items-center gap-3 text-slate-300">
-                      <CheckCircle2 className="w-5 h-5 text-teal-400" />
-                      <span>Rating separat pe fiecare skill</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-slate-300">
-                      <CheckCircle2 className="w-5 h-5 text-teal-400" />
-                      <span>Portofoliu cu poze din lucrări</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-slate-300">
-                      <CheckCircle2 className="w-5 h-5 text-teal-400" />
-                      <span>Tu faci oferta, nu aștepți</span>
-                    </div>
+                    {[
+                      "Primești proiecte potrivite skill-urilor tale",
+                      "Tu faci oferta la prețul tău",
+                      "Rating per skill = clienții te aleg pentru calitate",
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center gap-3 text-sm text-slate-300">
+                        <CheckCircle2 className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
                   </div>
-                  <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white text-lg h-14 px-8" asChild>
+
+                  <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white h-12 px-8" asChild>
                     <Link href="/auth/register">
                       Înscrie-te gratuit
                       <ArrowRight className="ml-2 w-5 h-5" />
                     </Link>
                   </Button>
                 </div>
-                <div className="hidden md:block">
-                  <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-                    <div className="space-y-4">
-                      <div className="bg-slate-700/50 rounded-xl p-4 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-teal-500/20 rounded-full flex items-center justify-center">
-                          <Star className="w-6 h-6 text-teal-400" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-white">⭐ 4.9 pe Zugrăvit</p>
-                          <p className="text-sm text-slate-400">127 lucrări finalizate</p>
-                        </div>
+
+                {/* Right - Mock Dashboard */}
+                <div className="hidden md:flex items-center justify-center p-8 bg-slate-800/50">
+                  <div className="w-full max-w-xs space-y-3">
+                    {/* Mock stat cards */}
+                    <div className="bg-slate-700/50 rounded-xl p-4 flex items-center gap-4 border border-slate-600/50">
+                      <div className="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center">
+                        <Star className="w-5 h-5 text-yellow-400" />
                       </div>
-                      <div className="bg-slate-700/50 rounded-xl p-4 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center">
-                          <CreditCard className="w-6 h-6 text-orange-400" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-white">+3.200 lei</p>
-                          <p className="text-sm text-slate-400">Venituri luna aceasta</p>
-                        </div>
+                      <div>
+                        <p className="font-semibold text-white text-sm">Rating 4.9 pe Zugrăvit</p>
+                        <p className="text-xs text-slate-400">Din 48 review-uri</p>
                       </div>
-                      <div className="bg-slate-700/50 rounded-xl p-4 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center">
-                          <FileText className="w-6 h-6 text-green-400" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-white">5 proiecte noi</p>
-                          <p className="text-sm text-slate-400">Așteaptă oferta ta</p>
-                        </div>
+                    </div>
+                    <div className="bg-slate-700/50 rounded-xl p-4 flex items-center gap-4 border border-slate-600/50">
+                      <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
+                        <TrendingUp className="w-5 h-5 text-green-400" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-white text-sm">+4.850 lei luna aceasta</p>
+                        <p className="text-xs text-slate-400">12 lucrări finalizate</p>
+                      </div>
+                    </div>
+                    <div className="bg-slate-700/50 rounded-xl p-4 flex items-center gap-4 border border-slate-600/50">
+                      <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                        <Briefcase className="w-5 h-5 text-orange-400" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-white text-sm">3 proiecte noi azi</p>
+                        <p className="text-xs text-slate-400">Așteaptă oferta ta</p>
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-r from-teal-500/20 to-teal-600/20 rounded-xl p-4 flex items-center gap-4 border border-teal-500/30">
+                      <div className="w-10 h-10 bg-teal-500/20 rounded-xl flex items-center justify-center">
+                        <Shield className="w-5 h-5 text-teal-400" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-white text-sm">Top Pro verificat</p>
+                        <p className="text-xs text-teal-300">Badge de încredere activ</p>
                       </div>
                     </div>
                   </div>
@@ -458,10 +513,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* FOOTER                                                     */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       <footer className="py-12 px-4 bg-slate-900">
         <div className="container mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
               <Link href="/" className="flex items-center gap-2 mb-4">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
@@ -469,51 +526,41 @@ export default function Home() {
                 </div>
                 <span className="text-xl font-bold text-white">MiniJob</span>
               </Link>
-              <p className="text-slate-400 text-sm mb-2">
-                <strong className="text-white">Rent a Skill</strong>
-              </p>
               <p className="text-slate-400 text-sm">
-                Închiriază skill-ul cuiva pentru câteva ore.
+                Găsește pe cineva care știe ce face. Meșteri și specialiști verificați.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-4">Skill Zones</h4>
+              <h4 className="font-semibold text-white mb-4 text-sm">Categorii</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li><Link href="/categories/casa" className="hover:text-teal-400">Casă</Link></li>
-                <li><Link href="/categories/constructii" className="hover:text-teal-400">Construcții</Link></li>
-                <li><Link href="/categories/auto" className="hover:text-teal-400">Auto</Link></li>
-                <li><Link href="/categories/tech" className="hover:text-teal-400">Tech Jobs</Link></li>
-                <li><Link href="/categories/pets" className="hover:text-teal-400">Pet Care</Link></li>
-                <li><Link href="/categories/kids" className="hover:text-teal-400">Kids & Learning</Link></li>
+                {skillZones.map(z => (
+                  <li key={z.slug}><Link href={`/categories/${z.slug}`} className="hover:text-teal-400 transition-colors">{z.name}</Link></li>
+                ))}
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-4">Platformă</h4>
+              <h4 className="font-semibold text-white mb-4 text-sm">Platformă</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li><Link href="/post-project" className="hover:text-teal-400">Postează proiect</Link></li>
-                <li><Link href="/auth/register" className="hover:text-teal-400">Devino specialist</Link></li>
-                <li><Link href="#cum-functioneaza" className="hover:text-teal-400">Cum funcționează</Link></li>
-                <li><Link href="#" className="hover:text-teal-400">Contact</Link></li>
+                <li><Link href="/post-project" className="hover:text-teal-400 transition-colors">Postează proiect</Link></li>
+                <li><Link href="/auth/register" className="hover:text-teal-400 transition-colors">Devino specialist</Link></li>
+                <li><Link href="/projects" className="hover:text-teal-400 transition-colors">Proiecte active</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-4">Legal</h4>
+              <h4 className="font-semibold text-white mb-4 text-sm">Legal</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li><Link href="/terms" className="hover:text-teal-400">Termeni și condiții</Link></li>
-                <li><Link href="/privacy" className="hover:text-teal-400">Politica de confidențialitate</Link></li>
-                <li><Link href="#" className="hover:text-teal-400">GDPR</Link></li>
+                <li><Link href="/terms" className="hover:text-teal-400 transition-colors">Termeni și condiții</Link></li>
+                <li><Link href="/privacy" className="hover:text-teal-400 transition-colors">Politica de confidențialitate</Link></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-slate-500">
               © 2026 MiniJob.ro - Transilvania Business Suite
             </p>
-            <div className="flex items-center gap-4">
-              <Badge variant="outline" className="border-slate-700 text-slate-400">
-                🇷🇴 Made in Sibiu
-              </Badge>
-            </div>
+            <Badge variant="outline" className="border-slate-700 text-slate-400">
+              🇷🇴 Made in Sibiu
+            </Badge>
           </div>
         </div>
       </footer>
