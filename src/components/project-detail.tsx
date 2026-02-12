@@ -214,6 +214,51 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
     setSubmitting(false);
   };
 
+  const handleAcceptOffer = async (offerId: string) => {
+    if (!confirm('Ești sigur că vrei să accepți această ofertă? Celelalte oferte vor fi respinse automat.')) return;
+    
+    const supabase = createClient();
+    
+    // Accept this offer
+    await (supabase as any)
+      .from('project_offers')
+      .update({ status: 'accepted' })
+      .eq('id', offerId);
+
+    // Reject all other offers
+    await (supabase as any)
+      .from('project_offers')
+      .update({ status: 'rejected' })
+      .eq('project_id', id)
+      .neq('id', offerId)
+      .eq('status', 'pending');
+
+    // Update project status
+    await (supabase as any)
+      .from('projects')
+      .update({ status: 'in_progress', accepted_offer_id: offerId })
+      .eq('id', id);
+
+    toast.success('Ofertă acceptată! Specialistul va fi notificat.');
+    
+    // Reload page
+    window.location.reload();
+  };
+
+  const handleRejectOffer = async (offerId: string) => {
+    if (!confirm('Ești sigur că vrei să respingi această ofertă?')) return;
+    
+    const supabase = createClient();
+    
+    await (supabase as any)
+      .from('project_offers')
+      .update({ status: 'rejected' })
+      .eq('id', offerId);
+
+    toast.success('Ofertă respinsă.');
+    setOffers(prev => prev.map(o => o.id === offerId ? { ...o, status: 'rejected' as any } : o));
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ro-RO', {
       day: 'numeric',
@@ -427,10 +472,40 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
                           </div>
                         </div>
 
-                        {/* Accept Button */}
-                        <Button className="bg-orange-500 hover:bg-orange-600 flex-shrink-0">
-                          Acceptă oferta
-                        </Button>
+                        {/* Accept/Reject Buttons */}
+                        <div className="flex flex-col gap-2 flex-shrink-0">
+                          {offer.status === 'pending' && project.status === 'open' ? (
+                            <>
+                              <Button
+                                size="sm"
+                                className="bg-orange-500 hover:bg-orange-600"
+                                onClick={() => handleAcceptOffer(offer.id)}
+                              >
+                                Acceptă
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-slate-500 hover:text-red-500"
+                                onClick={() => handleRejectOffer(offer.id)}
+                              >
+                                Respinge
+                              </Button>
+                            </>
+                          ) : (
+                            <Badge className={
+                              offer.status === 'accepted'
+                                ? 'bg-green-100 text-green-700'
+                                : offer.status === 'rejected'
+                                ? 'bg-red-100 text-red-600'
+                                : 'bg-slate-100 text-slate-600'
+                            }>
+                              {offer.status === 'accepted' ? '✓ Acceptată' :
+                               offer.status === 'rejected' ? '✗ Respinsă' :
+                               offer.status}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -447,12 +522,20 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
                 <CardTitle className="text-lg">Buget</CardTitle>
               </CardHeader>
               <CardContent>
-                {project.budget_min && project.budget_max ? (
+                {project.budget_min || project.budget_max ? (
                   <div className="text-3xl font-bold text-slate-900">
-                    {project.budget_min} - {project.budget_max} <span className="text-lg">lei</span>
+                    {project.budget_min && project.budget_max 
+                      ? <>{project.budget_min} - {project.budget_max} <span className="text-lg">lei</span></>
+                      : project.budget_max 
+                        ? <>Max {project.budget_max} <span className="text-lg">lei</span></>
+                        : <>De la {project.budget_min} <span className="text-lg">lei</span></>
+                    }
                   </div>
                 ) : (
-                  <p className="text-slate-500">Buget nedefinit - fă o ofertă</p>
+                  <div>
+                    <p className="text-lg font-semibold text-orange-500">Aștept oferte</p>
+                    <p className="text-sm text-slate-500 mt-1">Clientul așteaptă propunerile specialiștilor</p>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -480,6 +563,23 @@ export function ProjectDetail({ projectId }: ProjectDetailProps = {}) {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Sealed bid info for providers */}
+            {user && isProvider && !isOwner && project.status === 'open' && (
+              <Card className="border-slate-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                      <MessageCircle className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">{project.offers_count} oferte depuse</p>
+                      <p className="text-xs text-slate-500">Ofertele sunt sigilate - doar clientul le vede</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Make Offer Form (only for providers) */}
             {user && isProvider && !isOwner && !hasOffered && project.status === 'open' && (

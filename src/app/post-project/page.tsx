@@ -54,6 +54,7 @@ export default function PostProjectPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
+  const [budgetType, setBudgetType] = useState<'budget' | 'offers'>('offers'); // default: wait for offers
   const [budgetMin, setBudgetMin] = useState('');
   const [budgetMax, setBudgetMax] = useState('');
   const [city, setCity] = useState('Sibiu');
@@ -125,19 +126,20 @@ export default function PostProjectPage() {
     loadSkills();
   }, [selectedCategory]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // In production, upload to Cloudflare R2
-    // For now, just simulate with placeholder URLs
     if (e.target.files && e.target.files.length > 0) {
-      const newPhotos = Array.from(e.target.files).map((_, i) => 
-        `https://picsum.photos/400/300?random=${Date.now() + i}`
-      );
-      setPhotos([...photos, ...newPhotos].slice(0, 5)); // Max 5 photos
+      const files = Array.from(e.target.files);
+      const previews = files.map(f => URL.createObjectURL(f));
+      setPhotoFiles(prev => [...prev, ...files].slice(0, 5));
+      setPhotos(prev => [...prev, ...previews].slice(0, 5));
     }
   };
 
   const removePhoto = (index: number) => {
     setPhotos(photos.filter((_, i) => i !== index));
+    setPhotoFiles(photoFiles.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async () => {
@@ -181,7 +183,24 @@ export default function PostProjectPage() {
       }
     }
 
-    // Create project (using any to bypass type checking for new table)
+    // Upload photos to Supabase Storage
+    let uploadedPhotoUrls: string[] = [];
+    if (photoFiles.length > 0) {
+      for (let i = 0; i < photoFiles.length; i++) {
+        const file = photoFiles[i];
+        const ext = file.name.split('.').pop() || 'jpg';
+        const path = `projects/${user.id}/${Date.now()}_${i}.${ext}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('portfolio')
+          .upload(path, file, { cacheControl: '3600', upsert: false });
+        if (uploadData && !uploadError) {
+          const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path);
+          uploadedPhotoUrls.push(publicUrl);
+        }
+      }
+    }
+
+    // Create project
     const { error } = await (supabase as any)
       .from('projects')
       .insert({
@@ -190,9 +209,9 @@ export default function PostProjectPage() {
         skill_id: skillId,
         title: title,
         description: description,
-        photos: photos,
-        budget_min: budgetMin ? parseInt(budgetMin) : null,
-        budget_max: budgetMax ? parseInt(budgetMax) : null,
+        photos: uploadedPhotoUrls,
+        budget_min: budgetType === 'budget' && budgetMin ? parseInt(budgetMin) : null,
+        budget_max: budgetType === 'budget' && budgetMax ? parseInt(budgetMax) : null,
         location_city: city,
         location_address: address || null,
         deadline: deadline || null,
@@ -459,28 +478,56 @@ export default function PostProjectPage() {
                   </p>
                 </div>
 
-                {/* Budget */}
-                <div className="space-y-2">
-                  <Label>Buget estimat (RON)</Label>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <Input
-                        type="number"
-                        placeholder="Min"
-                        value={budgetMin}
-                        onChange={(e) => setBudgetMin(e.target.value)}
-                      />
-                    </div>
-                    <span className="text-slate-400">-</span>
-                    <div className="flex-1">
-                      <Input
-                        type="number"
-                        placeholder="Max"
-                        value={budgetMax}
-                        onChange={(e) => setBudgetMax(e.target.value)}
-                      />
-                    </div>
+                {/* Budget toggle */}
+                <div className="space-y-3">
+                  <Label>Buget</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setBudgetType('offers')}
+                      className={`p-4 rounded-xl border-2 text-left transition-all
+                        ${budgetType === 'offers'
+                          ? 'border-orange-500 bg-orange-50'
+                          : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                    >
+                      <p className="font-medium text-slate-900 text-sm">Aștept oferte</p>
+                      <p className="text-xs text-slate-500 mt-1">Specialiștii propun prețul lor</p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBudgetType('budget')}
+                      className={`p-4 rounded-xl border-2 text-left transition-all
+                        ${budgetType === 'budget'
+                          ? 'border-orange-500 bg-orange-50'
+                          : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                    >
+                      <p className="font-medium text-slate-900 text-sm">Am un buget</p>
+                      <p className="text-xs text-slate-500 mt-1">Setez un interval de preț</p>
+                    </button>
                   </div>
+                  {budgetType === 'budget' && (
+                    <div className="flex items-center gap-3 mt-2">
+                      <div className="flex-1">
+                        <Input
+                          type="number"
+                          placeholder="Min"
+                          value={budgetMin}
+                          onChange={(e) => setBudgetMin(e.target.value)}
+                        />
+                      </div>
+                      <span className="text-slate-400">-</span>
+                      <div className="flex-1">
+                        <Input
+                          type="number"
+                          placeholder="Max"
+                          value={budgetMax}
+                          onChange={(e) => setBudgetMax(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
                   {selectedSkillData && selectedSkillData.price_min && selectedSkillData.price_max && (
                     <p className="text-xs text-teal-600">
                       Prețul mediu pentru {selectedSkillData.name}: {selectedSkillData.price_min}-{selectedSkillData.price_max} lei/{selectedSkillData.price_unit}
@@ -604,7 +651,7 @@ export default function PostProjectPage() {
                     {selectedSkillData && <p><strong>Serviciu:</strong> {selectedSkillData.name}</p>}
                     <p><strong>Titlu:</strong> {title}</p>
                     <p><strong>Locație:</strong> {city}</p>
-                    {budgetMin && budgetMax && <p><strong>Buget:</strong> {budgetMin} - {budgetMax} RON</p>}
+                    <p><strong>Buget:</strong> {budgetType === 'budget' && budgetMin && budgetMax ? `${budgetMin} - ${budgetMax} RON` : 'Aștept oferte'}</p>
                   </div>
                 </div>
 
